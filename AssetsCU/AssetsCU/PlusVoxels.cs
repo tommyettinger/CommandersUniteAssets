@@ -1100,12 +1100,12 @@ namespace AssetsCU
                 }
                 
             }
-            /*
+            
             System.IO.Directory.CreateDirectory("animation");
-            ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.EXE");
+            ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
             startInfo.UseShellExecute = false;
             startInfo.Arguments = "-dispose background -delay 30 -loop 0 " + u + "/* animation/" + u + "_animated.gif";
-            Process.Start(startInfo).WaitForExit();*/
+            Process.Start(startInfo).WaitForExit();
             bin.Close();
         }
         private static void processBases()
@@ -2592,11 +2592,9 @@ namespace AssetsCU
         /// </summary>
         /// <param name="args"></param>
         static void Main(string[] args)
-        {/*
-
-            processUnitOutlined("Helicopter");
-
-            processUnitOutlined("Block");
+        {
+            
+            //processUnitOutlined("Block");
             
             processUnitOutlined("Infantry");
             processUnitOutlined("Infantry_Firing");
@@ -2605,17 +2603,18 @@ namespace AssetsCU
             processUnitOutlined("Infantry_S");
             processUnitOutlined("Infantry_T");
             processUnitOutlined("Infantry_T_Firing");
-            
-            
+
+
+            processUnitOutlined("Artillery");
+            processUnitOutlined("Artillery_P");
+            processUnitOutlined("Artillery_S");
+            processUnitOutlined("Artillery_T");
+
             processUnitOutlined("Tank");
             processUnitOutlined("Tank_P");
             processUnitOutlined("Tank_S");
             processUnitOutlined("Tank_T");
             
-            processUnitOutlined("Artillery");
-            processUnitOutlined("Artillery_P");
-            processUnitOutlined("Artillery_S");
-            processUnitOutlined("Artillery_T");
             
             processUnitOutlined("Supply");
             processUnitOutlined("Supply_P");
@@ -2623,14 +2622,22 @@ namespace AssetsCU
             processUnitOutlined("Supply_T");
             
             processUnitOutlined("Plane");
+            processUnitOutlined("Plane_P");
+            processUnitOutlined("Plane_S");
+            processUnitOutlined("Plane_T");
+
+            processUnitOutlined("Copter");
+            processUnitOutlined("Copter_P");
+            processUnitOutlined("Copter_S");
+            processUnitOutlined("Copter_T");
             
             processUnitOutlined("City");
             processUnitOutlined("Castle");
             processUnitOutlined("Factory");
             processUnitOutlined("Capital");
-            */
+            
             //WILL TAKE A LONG TIME!!!
-            makeGamePreview(8, 24);
+            //makeGamePreview(8, 24);
             
 
             /*
