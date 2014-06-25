@@ -2201,7 +2201,6 @@ namespace AssetsCU
             System.IO.Directory.CreateDirectory("animation");
             foreach (var fil in System.IO.Directory.EnumerateFiles("animation"))
             {
-                Console.WriteLine(fil);
                 System.IO.File.Delete(fil);
             }
             width = ((width / 2) * 2) + 1;
@@ -2450,7 +2449,7 @@ namespace AssetsCU
                 {
                     int rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
                     int rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
-                    placing[rgx, rgy] = new UnitInfo(9, colors[section], section, rgx, rgy);
+                    placing[rgx, rgy] = new UnitInfo(10, colors[section], section, rgx, rgy);
                     guarantee.Add(new Tuple<int, int>(rgx, rgy));
                 }
 
@@ -2583,17 +2582,17 @@ namespace AssetsCU
                     active.facing,
                     active.x, active.y);
             }
-            ProcessStartInfo startInfo = new ProcessStartInfo(@"C:\Program Files\ImageMagick-6.8.9-Q16\convert.EXE");
+            ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
             startInfo.UseShellExecute = false;
             startInfo.Arguments = "-dispose background -delay 24 -loop 0 animation/* animation/preview.gif";
             Process.Start(startInfo).WaitForExit();
         }
-
+        /// <summary>
+        /// This will take a long time to run.  It should produce a ton of assets and an animated gif preview.
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
-        {
-
-        //    processUnitOutlined("Pangolin");
-            //processUnitOutlined("Swordsman");
+        {/*
 
             processUnitOutlined("Helicopter");
 
@@ -2629,7 +2628,11 @@ namespace AssetsCU
             processUnitOutlined("Castle");
             processUnitOutlined("Factory");
             processUnitOutlined("Capital");
+            */
+            //WILL TAKE A LONG TIME!!!
+            makeGamePreview(12, 18);
             
+
             /*
             processFloor("Grass");
             processFloor("Forest");
@@ -2652,7 +2655,6 @@ namespace AssetsCU
             {
                 PlusPaletteDraw.drawPixelsFlat(i);
             }*/
-            //makeGamePreview(12, 18);
             //            makeFlatTiling().Save("tiling_flat.png", ImageFormat.Png);
             /*for (int i = 0; i < 40; i++)
             {

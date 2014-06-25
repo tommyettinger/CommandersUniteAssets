@@ -239,9 +239,6 @@
     <None Include="LightTank_rounded.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Pangolin_X.vox">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Plane_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
