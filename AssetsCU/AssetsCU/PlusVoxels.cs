@@ -1102,7 +1102,7 @@ namespace AssetsCU
             }
             /*
             System.IO.Directory.CreateDirectory("animation");
-            ProcessStartInfo startInfo = new ProcessStartInfo(@"C:\Program Files\ImageMagick-6.8.9-Q16\convert.EXE");
+            ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.EXE");
             startInfo.UseShellExecute = false;
             startInfo.Arguments = "-dispose background -delay 30 -loop 0 " + u + "/* animation/" + u + "_animated.gif";
             Process.Start(startInfo).WaitForExit();*/
@@ -1288,7 +1288,7 @@ namespace AssetsCU
                     g.DrawImage(bNW, 0, 0);
                     technique.Save(u + "color" + i + "/technique/NW/" + j + ".png", ImageFormat.Png);
                 }
-                ProcessStartInfo startInfo = new ProcessStartInfo(@"C:\Program Files\ImageMagick-6.8.9-Q16\convert.EXE");
+                ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
                 startInfo.UseShellExecute = false;
                 startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/SE/* " + u + "/color" + i + "_" + u + "_power_SE.gif";
                 Process.Start(startInfo).WaitForExit();
@@ -2366,9 +2366,9 @@ namespace AssetsCU
             int[] colors = { r.Next(6) + 2, r.Next(6) + 2, r.Next(7) + 1, r.Next(8) };
             colors[1] = 0;
             int[] targetX = {width / 2, width / 2}, targetY = {height / 2, height / 2};
-            for (int section = 0; section < 2; section++)
+            for (int section = 0; section < 1; section++)
             {
-                rx = (width / 4) + r.Next(3) - 1 + ((width - 1) / 2) * (section % 2);
+                rx = (width / 2) + r.Next(3) - 0 + ((width - 1) / 2) * (section % 1);
                 ry = 3 + ((height - 1) / 6) + r.Next(3);
                 //processSingleOutlined(facilityps[(colors[section] == 0) ? 3 : 2], colors[section], dirs[r.Next(4)])
                 if (colors[section] == 0)
@@ -2398,10 +2398,10 @@ namespace AssetsCU
 
                     }
                 }
-            }/*
-            for (int section = 2; section < 4; section++)
+            }
+            for (int section = 1; section < 2; section++)
             {
-                rx = (width / 4) + r.Next(3) - 1 + (width / 2) * (section % 2);
+                rx = (width / 2) - r.Next(3) - 0 + (width / 2) * (section % 1);
                 ry = height - 3 - (height / 6) - r.Next(3);
                 placing[rx, ry] = new UnitInfo(((colors[section] == 0) ? 14 : 13), colors[section], r.Next(4), rx, ry);
                 grid[rx, ry] = 0;
@@ -2418,13 +2418,13 @@ namespace AssetsCU
 
                     }
                 }
-            }*/
+            }
             List<Tuple<int, int>> guarantee = new List<Tuple<int, int>>();
             for (int section = 0; section < 2; section++) // section < 4
             {
-                for (int i = 2 + (width / 2) * (section % 2); i < (width / 2) - 2 + (width / 2) * (section % 2); i++)
+                for (int i = 2 + (width / 2) * (section % 1); i < (width / 2) - 2 + (width / 2) * (section % 1); i++)
                 {
-                    for (int j = (section / 2 == 0) ? 3 : height / 2 + 2; j < ((section / 2 == 0) ? height / 2 - 2 : height - 3); j++)
+                    for (int j = (section / 1 == 0) ? 3 : height / 2 + 2; j < ((section / 1 == 0) ? height / 2 - 2 : height - 3); j++)
                     {
                         if (placing[i, j] != null)
                             continue;
@@ -2447,8 +2447,8 @@ namespace AssetsCU
                 }
                 if (guarantee.Count == section)
                 {
-                    int rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
-                    int rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
+                    int rgx = r.Next(2 + (width / 2) * (section % 1), (width / 2) - 2 + (width / 2) * (section % 1));
+                    int rgy = r.Next((section / 1 == 0) ? 3 : height / 2 + 2, ((section / 1 == 0) ? height / 2 - 2 : height - 3));
                     placing[rgx, rgy] = new UnitInfo(10, colors[section], section, rgx, rgy);
                     guarantee.Add(new Tuple<int, int>(rgx, rgy));
                 }
@@ -2630,7 +2630,7 @@ namespace AssetsCU
             processUnitOutlined("Capital");
             */
             //WILL TAKE A LONG TIME!!!
-            makeGamePreview(12, 18);
+            makeGamePreview(8, 24);
             
 
             /*

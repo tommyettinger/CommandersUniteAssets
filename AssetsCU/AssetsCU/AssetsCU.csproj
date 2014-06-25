@@ -340,6 +340,9 @@
     <Content Include="black_outline_solo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="convert.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="cube_gray_off.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
