@@ -2879,12 +2879,13 @@ REBOOT:
             p2.StartInfo = new ProcessStartInfo(@"vpxenc.exe");
             p2.StartInfo.UseShellExecute = false;
             p2.StartInfo.Arguments = // "-w " + (128 * (width - 1)) + " -h " + 32 * ((height / 2) * 2) +
-@" --good --cpu-used=1 --auto-alt-ref=1 --lag-in-frames=10 --fps=10000/1001"+
-@" --end-usage=vbr --passes=2 --threads=2 --target-bitrate=8200 -o animation\preview.webm animation\preview.y4m";
+@" --best --cpu-used=1 --auto-alt-ref=1 --lag-in-frames=16 --fps=8000/1001"+
+@" --end-usage=vbr --undershoot-pct=95 --buf-sz=6000 --buf-initial-sz=4000 --buf-optimal-sz=5000" +
+@" --passes=2 --threads=2 --target-bitrate=1000 -o animation\preview.webm animation\preview.y4m";
             p2.Start();
             p2.WaitForExit();
 
-           // Console.In.ReadLine();
+//            Console.In.ReadLine();
 
             /* ffmpeg -r 1 -pattern_type glob -i '*.jpg'
             ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
@@ -2946,7 +2947,7 @@ REBOOT:
             processUnitOutlined("Castle");
             processUnitOutlined("Estate");
             */
-            makeGamePreview(12, 27);
+            makeGamePreview(12, 20);
 
 
             /*
