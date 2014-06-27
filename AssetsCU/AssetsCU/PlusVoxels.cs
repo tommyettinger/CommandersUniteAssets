@@ -8,23 +8,105 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 
+
 namespace AssetsCU
 {
 
+    enum MovementType
+    {
+        Foot, Treads, TreadsAmphi, Wheels, WheelsTraverse, Flight, Immobile
+    }
     class PlusVoxels
     {
-        public enum MovementType
-        {
-            Foot, Treads, Wheels, Flight, Immobile
-        }
-        public static string[] dirs = { "SE", "SW", "NW", "NE" };
+        public static string[] Terrains = new string[]
+        {"Plains","Forest","Desert","Jungle","Hills"
+        ,"Mountains","Ruins","Tundra","Road","River"};
+        public static string[] Directions = { "SE", "SW", "NW", "NE" };
         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
-        public static string[] existing_units = { "Infantry", //foot 0 0
-                                   "Tank", "Artillery", "Artillery_P", "Artillery_S", "Supply_P", //treads 1 5
-                                   "Artillery_T", "Supply", "Supply_T", //wheels 6 8
-                                   "Helicopter", "Plane", //flight 9 10
-                                   "City", "Factory", "Castle", "Capital" //facility
-                                 };
+        public static string[] CurrentUnits = {
+"Infantry", "Infantry_P", "Infantry_S", "Infantry_T",
+"Artillery", "Artillery_P", "Artillery_S", "Artillery_T",
+"Tank", "Tank_P", "Tank_S", "Tank_T",
+"Plane", "Plane_P", "Plane_S", "Plane_T",
+"Supply", "Supply_P", "Supply_S", "Supply_T",
+"Copter", "Copter_P", "Copter_S", "Copter_T", 
+"City", "Factory", "Airport", "Laboratory", "Castle", "Estate"};
+        public static Dictionary<string, int> UnitLookup = new Dictionary<string, int>(30), TerrainLookup = new Dictionary<string,int>(10);
+        public static Dictionary<MovementType, List<int>> MobilityToUnits = new Dictionary<MovementType, List<int>>(30), MobilityToTerrains = new Dictionary<MovementType, List<int>>();
+        public static List<int>[] TerrainToUnits = new List<int>[30];
+        public static Dictionary<int, List<MovementType>> TerrainToMobilities = new Dictionary<int, List<MovementType>>();
+        public static int[] CurrentSpeeds = {
+3, 3, 5, 3,
+4, 3, 6, 4,
+6, 4, 7, 6,
+7, 5, 9, 8,
+5, 5, 6, 6,
+7, 5, 8, 7, 
+0,0,0,0,0,0};
+        public static MovementType[] CurrentMobilities = {
+MovementType.Foot, MovementType.Foot, MovementType.WheelsTraverse, MovementType.Foot,
+MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.Wheels,
+MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.TreadsAmphi,
+MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.Flight,
+MovementType.Wheels, MovementType.Treads, MovementType.TreadsAmphi, MovementType.Wheels,
+MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.Flight, 
+MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, 
+                                                         };
+
+        public static void Initialize()
+        {
+            MovementType[] values = (MovementType[])Enum.GetValues(typeof(MovementType));
+            foreach (MovementType v in values)
+            {
+                MobilityToUnits[v] = new List<int>();
+            }
+            for (int t = 0; t < Terrains.Length; t++)
+            {
+                TerrainLookup[Terrains[t]] = t;
+                TerrainToMobilities[t] = new List<MovementType>();
+                TerrainToUnits[t] = new List<int>();
+            }
+            for (int i = 0; i < CurrentUnits.Length; i++)
+            {
+                UnitLookup[CurrentUnits[i]] = i;
+                MobilityToUnits[CurrentMobilities[i]].Add(i);
+            }
+            MobilityToTerrains[MovementType.Flight] =
+                new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            MobilityToTerrains[MovementType.Foot] =
+                new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            MobilityToTerrains[MovementType.Treads] =
+                new List<int>() { 0, 1, 2, 3, 6, 7, 8 };
+            MobilityToTerrains[MovementType.TreadsAmphi] =
+                new List<int>() { 0, 1, 2, 3, 6, 7, 8, 9 };
+            MobilityToTerrains[MovementType.Wheels] =
+                new List<int>() { 0, 2, 7, 8, };
+            MobilityToTerrains[MovementType.WheelsTraverse] =
+                new List<int>() { 0, 1, 2, 3, 6, 7, 8 };
+            MobilityToTerrains[MovementType.Immobile] =
+                new List<int>() { };
+
+            foreach (var kv in MobilityToTerrains)
+            {
+                foreach (int t in kv.Value)
+                {
+                    TerrainToMobilities[t].Add(kv.Key);
+                }
+            }
+            foreach (var kv in TerrainToMobilities)
+            {
+                foreach (MovementType m in kv.Value)
+                    TerrainToUnits[kv.Key].AddRange(MobilityToUnits[m]);
+                TerrainToUnits[kv.Key] = TerrainToUnits[kv.Key].Distinct().ToList();
+            }
+        }
+
+        /*{ "Infantry", //foot 0 0
+                               "Tank", "Artillery", "Artillery_P", "Artillery_S", "Supply_P", //treads 1 5
+                               "Artillery_T", "Supply", "Supply_T", //wheels 6 8
+                               "Helicopter", "Plane", //flight 9 10
+                               "City", "Factory", "Castle", "Capital" //facility
+                             };*/
         public static string[] final_units =
         {
             "Infantry",
@@ -52,78 +134,11 @@ namespace AssetsCU
 "Blitz Copter",
 "Comm Copter",
 };
-        public static Dictionary<string, string> name_matches = new Dictionary<string, string>
-        {
-            
-            {"Infantry", "Infantry"},
-            {"Bazooka", "Infantry"},
-{"Bike", "Infantry"},
-{"Sniper", "Infantry"},
-{"Light Artillery", "Artillery"},
-{"Defensive Artillery", "Artillery_P"},
-{"AA Artillery", "Artillery_S"},
-{"Stealth Artillery", "Artillery_T"},
-{"Light Tank", "Tank"},
-{"Heavy Tank", "Tank"},
-{"AA Tank", "Tank"},
-{"Recon Tank", "Tank"},
-{"Prop Plane", "Plane"},
-{"Ground Bomber", "Plane"},
-{"Fighter Jet", "Plane"},
-{"Stealth Bomber", "Plane"},
-{"Supply Truck", "Supply"},
-{"Rig", "Supply_P"},
-{"Amphi Transport", "Supply"},
-{"Jammer", "Supply_T"},
-{"Transport Copter", "Helicopter"},
-{"Gunship Copter", "Helicopter"},
-{"Blitz Copter", "Helicopter"},
-{"Comm Copter", "Helicopter"},
-{"City", "City"},
-{"Laboratory", "City"},
-{"Factory", "Factory"},
-{"Airport", "Factory"},
-{"Capital", "Castle"},
-{"Estate","Capital"}
-        };
-        public static Dictionary<int, int> index_matches = new Dictionary<int, int>
-        {
-            
-            {0,0},
-            {1,0},
-{2,0},
-{3,0},
-{4, 2},
-{5, 3},
-{6, 4},
-{7, 6},
-{8, 1},
-{9, 1},
-{10, 1},
-{11, 1},
-{12, 10},
-{13, 10},
-{14, 10},
-{15, 10},
-{16, 7},
-{17, 5},
-{18, 7},
-{19, 8},
-{20, 9},
-{21, 9},
-{22, 9},
-{23, 9},
-{24, 11},
-{25, 11},
-{26, 12},
-{27, 12},
-{28, 13},
-{29, 14},
-        };
 
         private class UnitInfo
         {
             public int unit;
+            public string name;
             public int color;
             public int facing;
 
@@ -133,47 +148,38 @@ namespace AssetsCU
             public int y;
             public UnitInfo()
             {
-                unit = index_matches[0];
+                unit = 0;
+                name = "Infantry";
                 speed = 3;
+                mobility = MovementType.Foot;
                 color = 1;
                 facing = 0;
                 x = 3;
                 y = 3;
             }
+            public UnitInfo(string name, int color, int facing, int x, int y)
+            {
+                this.name = name;
+                this.x = x;
+                this.y = y;
+                //                this.unit = index_matches[unit];
+                this.unit = UnitLookup[name];
+                this.color = color;
+                this.facing = facing;
+                this.speed = CurrentSpeeds[this.unit];
+                this.mobility = CurrentMobilities[this.unit];
+            }
             public UnitInfo(int unit, int color, int facing, int x, int y)
             {
+                this.name = CurrentUnits[unit];
                 this.x = x;
                 this.y = y;
                 //                this.unit = index_matches[unit];
                 this.unit = unit;
                 this.color = color;
                 this.facing = facing;
-                switch (this.unit)
-                {
-                    case 0: speed = 3; break;
-
-                    case 1: speed = 6; break;
-                    case 2: speed = 4; break;
-                    case 3: speed = 3; break;
-                    case 4: speed = 6; break;
-                    case 5: speed = 5; break;
-
-                    case 6: speed = 4; break;
-                    case 7: speed = 5; break;
-                    case 8: speed = 6; break;
-                    case 9: speed = 7; break;
-                    case 10: speed = 7; break;
-                    default: speed = 0; break;
-                }
-                mobility = MovementType.Immobile;
-                if (this.unit == 0)
-                    mobility = MovementType.Foot;
-                else if (this.unit >= 1 && this.unit <= 5)
-                    mobility = MovementType.Treads;
-                else if (this.unit >= 6 && this.unit <= 8)
-                    mobility = MovementType.Wheels;
-                else if (this.unit >= 9 && this.unit <= 10)
-                    mobility = MovementType.Flight;
+                this.speed = CurrentSpeeds[this.unit];
+                this.mobility = CurrentMobilities[this.unit];
             }
         }
         private static Random r = new Random(PlusPaletteDraw.r.Next());
@@ -183,24 +189,26 @@ namespace AssetsCU
         private static float[][] colors = new float[][]
         {
             //tires, tread
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
-            new float[] {0.3F,0.3F,0.33F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+            new float[] {0.23F,0.2F,0.2F,1F},
+//            new float[] {0.3F,0.3F,0.33F,1F},
             
             //mud, wood
             new float[] {0.4F,0.25F,0.15F,1F},
-            new float[] {0.25F,0.1F,0.4F,1F},
+            new float[] {0.2F,0.4F,0.3F,1F},
             new float[] {0.4F,0.25F,0.15F,1F},
             new float[] {0.4F,0.25F,0.15F,1F},
             new float[] {0.4F,0.25F,0.15F,1F},
             new float[] {0.4F,0.25F,0.15F,1F},
             new float[] {0.4F,0.25F,0.15F,1F},
             new float[] {0.4F,0.25F,0.15F,1F},
+            //new float[] {0.4F,0.3F,0.2F,1F},
             
             //gun barrel
             new float[] {0.4F,0.35F,0.5F,1F},
@@ -537,7 +545,7 @@ namespace AssetsCU
             foreach (MagicaVoxelData vx in voxels.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
             {
                 int current_color = 249 - vx.color;
-                
+
                 if (frame != 0 && colors[current_color + faction][3] == spin_alpha_0)
                     continue;
                 else if (frame != 1 && colors[current_color + faction][3] == spin_alpha_1)
@@ -607,7 +615,7 @@ namespace AssetsCU
             foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
             {
                 int current_color = 249 - vx.color;
-                
+
                 if (frame != 0 && colors[current_color + faction][3] == spin_alpha_0)
                     continue;
                 else if (frame != 1 && colors[current_color + faction][3] == spin_alpha_1)
@@ -1098,14 +1106,15 @@ namespace AssetsCU
                     processSingleOutlined(parsed, i, "NW", f).Save(u + "/color" + i + "_face2_NW" + "_frame" + f + "_.png", ImageFormat.Png); //nw
                     processSingleOutlined(parsed, i, "NE", f).Save(u + "/color" + i + "_face3_NE" + "_frame" + f + "_.png", ImageFormat.Png); //ne
                 }
-                
+
             }
-            
+
             System.IO.Directory.CreateDirectory("animation");
             ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
             startInfo.UseShellExecute = false;
             startInfo.Arguments = "-dispose background -delay 30 -loop 0 " + u + "/* animation/" + u + "_animated.gif";
             Process.Start(startInfo).WaitForExit();
+
             bin.Close();
         }
         private static void processBases()
@@ -1140,17 +1149,17 @@ namespace AssetsCU
                 {
 
 
-                    Bitmap power = drawPixelsSE(basepowers[j], i,0), oPower = drawOutlineSE(basepowers[j], i,0);
+                    Bitmap power = drawPixelsSE(basepowers[j], i, 0), oPower = drawOutlineSE(basepowers[j], i, 0);
                     g = Graphics.FromImage(oPower);
                     g.DrawImage(power, 2, 2);
                     oPower.Save("Power/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
 
-                    Bitmap speed = drawPixelsSE(basespeeds[j], i,0), oSpeed = drawOutlineSE(basespeeds[j], i,0);
+                    Bitmap speed = drawPixelsSE(basespeeds[j], i, 0), oSpeed = drawOutlineSE(basespeeds[j], i, 0);
                     g = Graphics.FromImage(oSpeed);
                     g.DrawImage(speed, 2, 2);
                     oSpeed.Save("Speed/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
 
-                    Bitmap technique = drawPixelsSE(basetechniques[j], i,0), oTechnique = drawOutlineSE(basetechniques[j], i,0);
+                    Bitmap technique = drawPixelsSE(basetechniques[j], i, 0), oTechnique = drawOutlineSE(basetechniques[j], i, 0);
                     g = Graphics.FromImage(oTechnique);
                     g.DrawImage(technique, 2, 2);
                     oTechnique.Save("Technique/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
@@ -1212,17 +1221,17 @@ namespace AssetsCU
                 System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/SW");
                 System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/NW");
                 System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/NE");
-                Bitmap bSE = drawPixelsSE(parsed, i,0);
+                Bitmap bSE = drawPixelsSE(parsed, i, 0);
                 bSE.Save(u + "/color" + i + "_" + u + "_default_SE" + ".png", ImageFormat.Png);
-                Bitmap bSW = drawPixelsSW(parsed, i,0);
+                Bitmap bSW = drawPixelsSW(parsed, i, 0);
                 bSW.Save(u + "/color" + i + "_" + u + "_default_SW" + ".png", ImageFormat.Png);
-                Bitmap bNW = drawPixelsNW(parsed, i,0);
+                Bitmap bNW = drawPixelsNW(parsed, i, 0);
                 bNW.Save(u + "/color" + i + "_" + u + "_default_NW" + ".png", ImageFormat.Png);
-                Bitmap bNE = drawPixelsNE(parsed, i,0);
+                Bitmap bNE = drawPixelsNE(parsed, i, 0);
                 bNE.Save(u + "/color" + i + "_" + u + "_default_NE" + ".png", ImageFormat.Png);
                 for (int j = 0; j < 8; j++)
                 {
-                    Bitmap power = drawPixelsSE(basepowers[j], i, j%2);
+                    Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
                     Graphics g = Graphics.FromImage(power);
                     g.DrawImage(bSE, 0, 0);
                     power.Save(u + "color" + i + "/power/SE/" + j + ".png", ImageFormat.Png);
@@ -1407,7 +1416,7 @@ namespace AssetsCU
 
             List<Tuple<int, int>> path = new List<Tuple<int, int>>();
             int x;
-            int initial_y = 2 * (int)(r.Next(3, height - 2) * 0.5) + 1;
+            int initial_y = (r.Next(6, (height*2) - 4) / 2) + 1;
             int y = initial_y;
             int midpoint = width / 2;
             int dir = (r.Next(2) == 0) ? -1 : 1;
@@ -1439,13 +1448,15 @@ namespace AssetsCU
             for (x = width - 1; x >= width * 0.25; )
             {
                 path.Add(new Tuple<int, int>(x, y));
-                if (y % 2 == 1)
-                {
-                    x--;
-                }
+
                 if (r.Next(6) == 0) dir *= -1;
                 y += dir;
 
+                if (y % 2 == 0)
+                {
+                    x--;
+                }
+                
                 if (y < 2)
                 {
                     y += 2;
@@ -1456,17 +1467,20 @@ namespace AssetsCU
                     y -= 2;
                     dir *= -1;
                 }
-                if (x > 1 && x < width - 1 && y > 2 && y < height - 2)
-                {
-                    int[] adj = { grid[x, y + 2], grid[x + 1, y], grid[x, y - 2], grid[x - 1, y] };
-                    {
-                        if (adj.Count(i => i == 10) > 1)
-                        {
-                            if (y % 2 == 0) y -= dir;
-                            dir *= -1;
-                        }
-                    }
-                }
+                //if (x > 1 && x < width - 1 && y > 2 && y < height - 2)
+                //{
+                //    int[] adj = { grid[x, y + 2], grid[x + 1, y], grid[x, y - 2], grid[x - 1, y] };
+                //    {
+                //        if (adj.Count(i => i == 10) > 1)
+                //        {
+                //            if (y % 2 == 0)
+                //            {
+                //                x++;
+                //            }
+                //            dir *= -1;
+                //        }
+                //    }
+                //}
             }
 
             return path;
@@ -1969,6 +1983,8 @@ namespace AssetsCU
                 {MovementType.Foot, true},
                 {MovementType.Treads, true},
                 {MovementType.Wheels, true},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, true},
                 {MovementType.Flight, true},
                 {MovementType.Immobile, false},
             };
@@ -1982,6 +1998,8 @@ namespace AssetsCU
                 {MovementType.Foot, false},
                 {MovementType.Treads, true},
                 {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
                 {MovementType.Immobile, false},
             };
@@ -1994,18 +2012,50 @@ namespace AssetsCU
                 {MovementType.Foot, false},
                 {MovementType.Treads, false},
                 {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
                 {MovementType.Immobile, false},
             };
                     break;
                 case MovementType.Wheels:
                     ability =
-            new int[] { 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, };
+            new int[] { 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, false},
                 {MovementType.Treads, false},
                 {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.TreadsAmphi:
+                    ability =
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, false},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.WheelsTraverse:
+                    ability =
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, false},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
                 {MovementType.Immobile, false},
             };
@@ -2018,6 +2068,8 @@ namespace AssetsCU
                 {MovementType.Foot, true},
                 {MovementType.Treads, true},
                 {MovementType.Wheels, true},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, true},
                 {MovementType.Flight, false},
                 {MovementType.Immobile, false},
             };
@@ -2101,7 +2153,7 @@ namespace AssetsCU
                 for (int i = 0; i < width; i++)
                 {
                     n[i, j] = d[i + j * width];
-                    Console.Write(string.Format("{0,4} ", n[i, j]));
+                    Console.Write(string.Format("{0,4}", n[i, j]));
                 }
                 Console.WriteLine();
             }
@@ -2131,9 +2183,9 @@ namespace AssetsCU
                     near[currentX - 1 + width * (currentY - 1)] = d_inv[currentX - 1, currentY - 1];
                 }
                 int newpos = near.OrderBy(kv => kv.Value).First().Key;
-                if(near.All(e => e.Value == near[newpos]))
+                if (near.All(e => e.Value == near[newpos]))
                 {
-                    newpos = near.OrderBy(kv => kv.Value * (0.5 - r.Next(2))).First().Key;
+                    return new List<Tuple<int, int, int>>();
                 }
                 int newX = newpos % width, newY = newpos / width;
                 if (!(newX == currentX && newY == currentY))
@@ -2228,7 +2280,7 @@ namespace AssetsCU
             //, City, Castle, Factory, Capital
             BinaryReader bin;
             List<MagicaVoxelData[]> unitps = new List<MagicaVoxelData[]>(), facilityps = new List<MagicaVoxelData[]>();
-            foreach (string u in existing_units)
+            foreach (string u in CurrentUnits)
             {
                 bin = new BinaryReader(File.Open(u + "_X.vox", FileMode.Open));
                 unitps.Add(FromMagica(bin));
@@ -2265,7 +2317,7 @@ namespace AssetsCU
                 grid[t.Item1 + 3, t.Item2] = 9;
                 takenLocations[t.Item1 + 3, t.Item2] = 1;
             }
-            int numMountains = r.Next(height / 2, height);
+            int numMountains = r.Next(width / 2, width);
             int iter = 0;
             int rx = r.Next(width - 2) + 1, ry = r.Next(height - 3) + 2;
             do
@@ -2290,17 +2342,17 @@ namespace AssetsCU
                 iter++;
             } while (iter < numMountains);
 
-            List<Tuple<int, int>> h = getHardPath(width, height / 3);
+            List<Tuple<int, int>> h = getHardPath(width, height / 2);
             foreach (Tuple<int, int> t in h)
             {
-                grid[t.Item1, t.Item2 + 3] = 8;
-                takenLocations[t.Item1, t.Item2 + 3] = 4;
+                grid[t.Item1, t.Item2 + 2] = 8;
+                takenLocations[t.Item1, t.Item2 + 2] = 4;
             }
-            h = getHardPath(width, height / 3);
+            h = getHardPath(width, height / 2);
             foreach (Tuple<int, int> t in h)
             {
-                grid[t.Item1, t.Item2 + height / 2 + 3] = 8;
-                takenLocations[t.Item1, t.Item2 + height / 2 + 3] = 4;
+                grid[t.Item1, t.Item2 + 2*((height / 3 + 3)/2)] = 8;
+                takenLocations[t.Item1, t.Item2 + 2 * ((height / 3 + 3) / 2)] = 4;
             }
 
             int extreme = 0;
@@ -2350,7 +2402,7 @@ namespace AssetsCU
                             likeliest = extreme;
                         if (extreme == 7 && (r.Next(4) == 0) || (adj.Contains(7) && r.Next(3) > 0))
                             likeliest = extreme;
-                        if ((adj.Contains(1) && r.Next(5) > 1) || r.Next(4) == 0)
+                        if ((adj.Contains(1) && r.Next(5) > 2) || r.Next(7) == 0)
                             likeliest = r.Next(2) * 2 + 1;
                         if (adj.Contains(5) && r.Next(3) == 0)
                             likeliest = r.Next(4, 6);
@@ -2363,25 +2415,30 @@ namespace AssetsCU
                     }
                 }
             }
-            int[] colors = { r.Next(6) + 2, r.Next(6) + 2, r.Next(7) + 1, r.Next(8) };
-            colors[1] = 0;
-            int[] targetX = {width / 2, width / 2}, targetY = {height / 2, height / 2};
-            for (int section = 0; section < 1; section++)
+            int[] colors = { r.Next(6) + 2, r.Next(6) + 2, r.Next(7) + 1, r.Next(7) + 1 };
+            colors[0] = 0;
+            int[] targetX = { width / 4, width / 2, width / 4, width / 2, },
+                  targetY = { height / 2, height / 4, height / 2, height / 4 };
+            for (int section = 0; section < 2; section++)
             {
-                rx = (width / 2) + r.Next(3) - 0 + ((width - 1) / 2) * (section % 1);
-                ry = 3 + ((height - 1) / 6) + r.Next(3);
+                rx = (width / 4) + (width / 2) * (section % 2);
+                ry = 3 + (height / 6);
                 //processSingleOutlined(facilityps[(colors[section] == 0) ? 3 : 2], colors[section], dirs[r.Next(4)])
                 if (colors[section] == 0)
                 {
-                    placing[rx, ry] = new UnitInfo(14, colors[section], r.Next(4), rx, ry);
-                    targetX[0] = rx;
-                    targetY[0] = ry;
+                    placing[rx, ry] = new UnitInfo("Estate", colors[section], r.Next(4), rx, ry);
+                    targetX[1] = rx;
+                    targetY[1] = ry;
+                    targetX[2] = rx;
+                    targetY[2] = ry;
+                    targetX[3] = rx;
+                    targetY[3] = ry;
                 }
                 else
                 {
-                    placing[rx, ry] = new UnitInfo(13, colors[section], r.Next(4), rx, ry);
-                    targetX[1] = rx;
-                    targetY[1] = ry;
+                    placing[rx, ry] = new UnitInfo("Castle", colors[section], r.Next(4), rx, ry);
+                    targetX[0] = rx;
+                    targetY[0] = ry;
                 }
                 grid[rx, ry] = 0;
                 for (int i = rx - (width / 8); i < rx + (width / 8); i++)
@@ -2392,18 +2449,19 @@ namespace AssetsCU
                             continue;
                         if (r.Next(5) <= 1 && (grid[i, j] == 0 || grid[i, j] == 1 || grid[i, j] == 2 || grid[i, j] == 4 || grid[i, j] == 8))
                         {
-                            placing[i, j] = new UnitInfo(10 + (r.Next(3) % 2), colors[section], r.Next(4), i, j);
+                            //
+                            placing[i, j] = new UnitInfo(r.Next(24, 28), colors[section], r.Next(4), i, j);
                             //processSingleOutlined(facilityps[r.Next(3) % 2], colors[section], dirs[r.Next(4)]);
                         }
 
                     }
                 }
             }
-            for (int section = 1; section < 2; section++)
+            for (int section = 2; section < 4; section++)
             {
-                rx = (width / 2) - r.Next(3) - 0 + (width / 2) * (section % 1);
-                ry = height - 3 - (height / 6) - r.Next(3);
-                placing[rx, ry] = new UnitInfo(((colors[section] == 0) ? 14 : 13), colors[section], r.Next(4), rx, ry);
+                rx = (width / 4) + (width / 2) * (section % 2);
+                ry = height - 3 - (height / 6);
+                placing[rx, ry] = new UnitInfo(((colors[section] == 0) ? UnitLookup["Estate"] : UnitLookup["Castle"]), colors[section], r.Next(4), rx, ry);
                 grid[rx, ry] = 0;
                 for (int i = rx - (width / 8); i < rx + (width / 8); i++)
                 {
@@ -2413,32 +2471,26 @@ namespace AssetsCU
                             continue;
                         if (r.Next(5) <= 1 && (grid[i, j] == 0 || grid[i, j] == 1 || grid[i, j] == 2 || grid[i, j] == 4 || grid[i, j] == 8))
                         {
-                            placing[i, j] = new UnitInfo(10 + (r.Next(3) % 2), colors[section], r.Next(4), i, j);
+                            placing[i, j] = new UnitInfo(r.Next(24, 28), colors[section], r.Next(4), i, j);
                         }
 
                     }
                 }
             }
             List<Tuple<int, int>> guarantee = new List<Tuple<int, int>>();
-            for (int section = 0; section < 2; section++) // section < 4
+            for (int section = 0; section < 4; section++) // section < 4
             {
-                for (int i = 2 + (width / 2) * (section % 1); i < (width / 2) - 2 + (width / 2) * (section % 1); i++)
+                for (int i = 2 + (width / 2) * (section % 2); i < (width / 2) - 2 + (width / 2) * (section % 2); i++)
                 {
-                    for (int j = (section / 1 == 0) ? 3 : height / 2 + 2; j < ((section / 1 == 0) ? height / 2 - 2 : height - 3); j++)
+                    for (int j = (section / 2 == 0) ? 3 : height / 2 + 2; j < ((section / 2 == 0) ? height / 2 - 2 : height - 3); j++)
                     {
                         if (placing[i, j] != null)
                             continue;
-                        int current_unit = r.Next(9);
-                        if (grid[i, j] == 4 || grid[i, j] == 5 || grid[i, j] == 9)
-                            current_unit = 0;
-                        else if (grid[i, j] == 1 || grid[i, j] == 3 || grid[i, j] == 6 || grid[i, j] == 7)
-                            current_unit = r.Next(6);
-                        if (r.Next(9) <= 1)
-                            current_unit = new int[] { r.Next(9, 11), r.Next(9, 11) }.Min();
+                        int currentUnit = TerrainToUnits[grid[i, j]].RandomElement();
                         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
                         if (r.Next(14) <= 2)
                         {
-                            placing[i, j] = new UnitInfo(current_unit, colors[section], section, i, j);
+                            placing[i, j] = new UnitInfo(currentUnit, colors[section], section, i, j);
                             if (guarantee.Count == section)
                                 guarantee.Add(new Tuple<int, int>(i, j));
                         }
@@ -2447,9 +2499,9 @@ namespace AssetsCU
                 }
                 if (guarantee.Count == section)
                 {
-                    int rgx = r.Next(2 + (width / 2) * (section % 1), (width / 2) - 2 + (width / 2) * (section % 1));
-                    int rgy = r.Next((section / 1 == 0) ? 3 : height / 2 + 2, ((section / 1 == 0) ? height / 2 - 2 : height - 3));
-                    placing[rgx, rgy] = new UnitInfo(10, colors[section], section, rgx, rgy);
+                    int rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
+                    int rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
+                    placing[rgx, rgy] = new UnitInfo(TerrainToUnits[grid[rgx,rgy]].RandomElement(), colors[section], section, rgx, rgy);
                     guarantee.Add(new Tuple<int, int>(rgx, rgy));
                 }
 
@@ -2458,17 +2510,11 @@ namespace AssetsCU
             {
                 for (int j = 3; j < height - 3; j++)
                 {
-                    if (r.Next(25) == 0 && placing[i, j] == null)
+                    if (r.Next(18) == 0 && placing[i, j] == null)
                     {
-                        int rs = r.Next(2); //4
-                        int current_unit = r.Next(9);
-                        if (grid[i, j] == 4 || grid[i, j] == 5 || grid[i, j] == 9)
-                            current_unit = 0;
-                        else if (grid[i, j] == 1 || grid[i, j] == 3 || grid[i, j] == 6 || grid[i, j] == 7)
-                            current_unit = new int[] { r.Next(6), r.Next(6), r.Next(6), r.Next(6, 9) }[r.Next(4)];
-                        if (r.Next(11) <= 1)
-                            current_unit = new int[] { r.Next(9, 11), r.Next(9, 11)}.Min();
-                        placing[i, j] = new UnitInfo(current_unit, colors[rs], rs, i, j);
+                        int rs = r.Next(2);
+                        int currentUnit = TerrainToUnits[grid[i, j]].RandomElement();
+                        placing[i, j] = new UnitInfo(currentUnit, colors[rs], rs, i, j);
 
                     }
                 }
@@ -2489,7 +2535,7 @@ namespace AssetsCU
             Bitmap b;
             Graphics g;
 
-            for (int u = 0; u < 2; u++)
+            for (int u = 0; u < 4; u++)
             {
                 UnitInfo active = new UnitInfo(
                     placing[guarantee[u].Item1, guarantee[u].Item2].unit,
@@ -2508,13 +2554,23 @@ namespace AssetsCU
                     }
                 }
                 List<Tuple<int, int, int>> path = getDijkstraPath(active, grid, placing, targetX[u], targetY[u]);
-                for (int f = -4; f < path.Count*2; f++)
+                if(path.Count == 0)
+                {
+
+                    placing[active.x, active.y] = new UnitInfo(
+                        active.unit,
+                        active.color,
+                        active.facing,
+                        active.x, active.y);
+                    continue;
+                }
+                for (int f = -2; f < path.Count * 2; f++)
                 {
                     b = new Bitmap(128 * (width - 1), 32 * ((height / 2) * 2));
                     g = Graphics.FromImage(b);
                     if (f >= 0)
                     {
-                        Tuple<int, int, int> node = path[f/2];
+                        Tuple<int, int, int> node = path[f / 2];
                         active.x = node.Item1;
                         active.y = node.Item2;
                         active.facing = node.Item3;
@@ -2553,27 +2609,53 @@ namespace AssetsCU
                                imageAttributes);
                             //g.DrawImage(tilings[grid[i, j]], (128 * i) - ((j % 2 == 0) ? 0 : 64), (32 * j) - 35 - 32);
                             if (placing[i, j] != null)
-                                g.DrawImageUnscaled(
+                            {
+                                g.DrawImageUnscaled(new Bitmap(placing[i, j].name + "/color" + placing[i, j].color +
+                                    "_face" + placing[i, j].facing + "_" + Directions[placing[i, j].facing] +
+                                    "_frame" + ((placing[i, j].speed > 0) ? (f + 100) % 2 : 0) + "_.png"),
+                                    (128 * i) - ((j % 2 == 0) ? 0 : 64) + 20,
+                                    (32 * j) - 64 - 16 - heights[grid[i, j]] * 3);
+                            }
+                                /*g.DrawImageUnscaled(
                                     processSingleOutlined(
                                       unitps[placing[i, j].unit],
-                                      placing[i, j].color, 
-                                      dirs[placing[i, j].facing],
+                                      placing[i, j].color,
+                                      Directions[placing[i, j].facing],
                                     ((placing[i, j].speed > 0) ? (f + 100) % 2 : 0))
                                     , (128 * i) - ((j % 2 == 0) ? 0 : 64) + 20,
-                                    (32 * j) - 64 - 16 - heights[grid[i, j]] * 3);
+                                    (32 * j) - 64 - 16 - heights[grid[i, j]] * 3);*/
                             if (i == active.x && j == active.y)
-                                g.DrawImageUnscaled(
+                                g.DrawImageUnscaled(new Bitmap(active.name + "/color" + active.color +
+                                    "_face" + active.facing + "_" + Directions[active.facing] + 
+                                    "_frame" + ((active.speed > 0) ? (f + 100) % 2 : 0) + "_.png"),
+                                    (128 * i) - ((j % 2 == 0) ? 0 : 64) + 20,
+                                    (32 * j) - 64 - 16 - heights[grid[i, j]] * 3);
+/*                                g.DrawImageUnscaled(
                                     processSingleOutlined(
                                       unitps[active.unit],
                                       active.color,
-                                      dirs[active.facing],
+                                      Directions[active.facing],
                                     ((active.speed > 0) ? (f + 100) % 2 : 0))
                                     , (128 * i) - ((j % 2 == 0) ? 0 : 64) + 20,
-                                    (32 * j) - 64 - 16 - heights[grid[i, j]] * 3);
+                                    (32 * j) - 64 - 16 - heights[grid[i, j]] * 3);*/
                         }
                     }
-                    string fname = "a".PadRight(5 + f, 'b');
-                    b.Save("animation/" + u + "_" + fname + ".png", ImageFormat.Png);
+                    if (f == -2)
+                    {
+                        b.Save("animation/" + u + "_aa.png", ImageFormat.Png);
+                        b.Save("animation/" + u + "_ba.png", ImageFormat.Png);
+                    }
+                    else if (f == -1)
+                    {
+
+                        b.Save("animation/" + u + "_ab.png", ImageFormat.Png);
+                        b.Save("animation/" + u + "_bb.png", ImageFormat.Png);
+                    }
+                    else
+                    {
+                        string fname = "c".PadRight(2 + f, 'c');
+                        b.Save("animation/" + u + "_" + fname + ".png", ImageFormat.Png);
+                    }
                     b.Dispose();
                 }
                 placing[active.x, active.y] = new UnitInfo(
@@ -2584,16 +2666,17 @@ namespace AssetsCU
             }
             ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
             startInfo.UseShellExecute = false;
-            startInfo.Arguments = "-dispose background -delay 24 -loop 0 animation/* animation/preview.gif";
+            startInfo.Arguments = "-dispose background -delay 22 -loop 0 animation/* animation/preview.gif";
             Process.Start(startInfo).WaitForExit();
         }
+        
         /// <summary>
         /// This will take a long time to run.  It should produce a ton of assets and an animated gif preview.
         /// </summary>
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            
+            Initialize();
             //processUnitOutlined("Block");
             
             processUnitOutlined("Infantry");
@@ -2601,6 +2684,7 @@ namespace AssetsCU
             processUnitOutlined("Infantry_P");
             processUnitOutlined("Infantry_P_Firing");
             processUnitOutlined("Infantry_S");
+
             processUnitOutlined("Infantry_T");
             processUnitOutlined("Infantry_T_Firing");
 
@@ -2613,14 +2697,15 @@ namespace AssetsCU
             processUnitOutlined("Tank");
             processUnitOutlined("Tank_P");
             processUnitOutlined("Tank_S");
+
             processUnitOutlined("Tank_T");
-            
-            
+
+
             processUnitOutlined("Supply");
             processUnitOutlined("Supply_P");
             processUnitOutlined("Supply_S");
             processUnitOutlined("Supply_T");
-            
+
             processUnitOutlined("Plane");
             processUnitOutlined("Plane_P");
             processUnitOutlined("Plane_S");
@@ -2632,13 +2717,14 @@ namespace AssetsCU
             processUnitOutlined("Copter_T");
             
             processUnitOutlined("City");
-            processUnitOutlined("Castle");
             processUnitOutlined("Factory");
-            processUnitOutlined("Capital");
+            processUnitOutlined("Airport");
+            processUnitOutlined("Laboratory");
+            processUnitOutlined("Castle");
+            processUnitOutlined("Estate");
             
-            //WILL TAKE A LONG TIME!!!
-            //makeGamePreview(8, 24);
-            
+            makeGamePreview(17, 35);
+
 
             /*
             processFloor("Grass");

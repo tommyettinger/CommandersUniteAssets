@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="OrthoDawnBringer.cs" />
     <Compile Include="OrthoPaletteDraw.cs" />
     <Compile Include="DawnDraw.cs" />
@@ -64,6 +65,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Airport_X.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="App.config" />
     <None Include="Artillery_P_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -170,9 +174,7 @@
     <None Include="Block_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Capital_X.vox">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="Capital_X.vox" />
     <None Include="Castle_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -192,6 +194,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="customcolors.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Estate_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Factory_X.vox">
@@ -233,6 +238,7 @@
     <None Include="Infantry_P_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Bike_X.vox" />
     <None Include="Infantry_S_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -246,6 +252,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Jungle_P.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Laboratory_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="LightTank_rounded.vox">
