@@ -521,7 +521,7 @@ Ruins	purple-gray
                 {
                     g.DrawImage(
                    image,
-                   new Rectangle((x + 0) * 2, 100 - 30 - 0 - 0 + x - z * 3, width, height),  // destination rectangle 
+                   new Rectangle((x + 0) * 2, 100 - 32 - 0 - 0 + x - z * 3, width, height),  // destination rectangle 
                         //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                    0, 0,        // upper-left corner of source rectangle 
                    width,       // width of source rectangle
@@ -533,7 +533,7 @@ Ruins	purple-gray
                 {
                     g.DrawImage(
                    image,
-                   new Rectangle((31 + y) * 2, 100 - 30 - 0 - y + 31 - z * 3, width, height),  // destination rectangle 
+                   new Rectangle((31 + y) * 2, 100 - 32 - 0 - y + 31 - z * 3, width, height),  // destination rectangle 
                         //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                    0, 0,        // upper-left corner of source rectangle 
                    width,       // width of source rectangle
@@ -624,7 +624,7 @@ Ruins	purple-gray
                     }
                     g.DrawImage(
                    image,
-                   new Rectangle((x + y) * 2, 100 - 30 - 0 - y + x - depth * 3, width, height),  // destination rectangle 
+                   new Rectangle((x + y) * 2, 100 - 32 - 0 - y + x - depth * 3, width, height),  // destination rectangle 
                         //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                    0, 0,        // upper-left corner of source rectangle 
                    width,       // width of source rectangle

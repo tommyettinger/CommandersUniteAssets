@@ -442,6 +442,9 @@
     <Content Include="flat_soft.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="spin_soft.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

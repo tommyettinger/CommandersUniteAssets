@@ -32,7 +32,7 @@ namespace AssetsCU
             {
                 for (int j = 0; j < mat.GetLength(1); j++)
                 {
-                    if(mat[i,j].color == color)
+                    if (mat[i, j] != null && mat[i, j].color == color)
                     {
                         units.Add(mat[i, j]);
                     }

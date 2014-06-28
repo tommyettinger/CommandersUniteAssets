@@ -1,0 +1,36 @@
+<html>
+<head>
+<title>IsoVoxel Demo</title>
+<style type="text/css">
+img {border:none; padding: 0px; margin: 0px; outline: none;}
+body {
+	background-color: #aaa;
+/*	background-image: url(tall/tiling_flat.png);
+	background-position: 8px 8px;*/
+}
+#center
+{
+  width: 1280px;
+  display: block;
+  margin-top: 100px;
+  margin-bottom: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #ddd;
+  
+}
+p, a {color: #333; font-family: 'Arial';}
+</style>
+</head>
+<body>
+    <div id="center">
+    <video loop="true" controls="true">
+        <source src="animation/preview.mp4" type="video/mp4"></source>
+        <source src="animation/preview.webm" type="video/webm"></source>
+        <source src="animation/preview.ogv" type="video/ogg"></source>
+    </video>
+    <br />
+    <p>This is a demo of the IsoVoxel renderer that converts MagicaVoxel .vox files to the isometric pixel art you see here.</p>
+    </div>
+</body>
+</html>
