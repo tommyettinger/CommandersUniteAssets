@@ -8,12 +8,21 @@ namespace AssetsCU
     public static class Extensions
     {
         private static Random r = new Random();
-        public static T RandomElement<T>(this List<T> list)
+        public static T RandomElement<T>(this IEnumerable<T> list)
         {
-            if (list.Count == 0)
+            if (list.Count() == 0)
                 return default(T);
+            int idx = 0, tgt = r.Next(list.Count());
+            foreach(T t in list)
+            {
+                if(tgt == idx)
+                {
+                    return t;
+                }
+                idx++;
+            }
+            return default(T);
 
-            return list[r.Next(list.Count)];
         }
         public static T RandomElement<T>(this T[,] mat)
         {
@@ -32,7 +41,7 @@ namespace AssetsCU
             {
                 for (int j = 0; j < mat.GetLength(1); j++)
                 {
-                    if (mat[i, j] != null && mat[i, j].color == color)
+                    if (mat[i, j] != null && mat[i, j].color == color && mat[i, j].speed > 0)
                     {
                         units.Add(mat[i, j]);
                     }

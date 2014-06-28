@@ -2405,7 +2405,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     near[currentX - 1 + width * (currentY + 1)] = d_inv[currentX - 1, currentY + 1];
                     near[currentX - 1 + width * (currentY - 1)] = d_inv[currentX - 1, currentY - 1];
                 }
-                int newpos = near.OrderBy(kv => kv.Value).First().Key;
+                var ordered = near.OrderBy(kv => kv.Value); //.First().Key;;
+                int newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
                 if (near.All(e => e.Value == near[newpos]))
                 {
                     return new List<Tuple<int, int, int>>();
@@ -2449,17 +2450,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                             else
                                 currentFacing = 3;
                         }
-                    if (placing[newX, newY] != null && newX == targetX && newY == targetY)
-                    {
 
-                    }
-                    else
+                    currentX = newX;
+                    currentY = newY;
+                    /*if (placing[newX, newY] != null && newX == targetX && newY == targetY)
                     {
-                        currentX = newX;
-                        currentY = newY;
+                        break;
                     }
                     if (d_inv[newX, newY] <= 1.1F && placing[newX, newY] == null)
                         break;
+                    */
                 }
                 path.Add(new Tuple<int, int, int>(currentX, currentY, currentFacing));
             }
@@ -2469,8 +2469,20 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             return path;
         }
-
-        static void makeGamePreview(int width, int height)
+        private static int failCount = 0;
+        static void retryGamePreview(int MapWidth, int MapHeight)
+        {
+            failCount++;
+            Console.WriteLine("\n\n!!!!!!!!F A I L U R E   " + failCount + " !!!!!!!!\n\n");
+            if (failCount > 10)
+            {
+                Console.WriteLine("Too many dijkstra failures.");
+                Console.In.ReadLine();
+                return;
+            }
+            makeGamePreview(MapWidth, MapHeight);
+        }
+        static void makeGamePreview(int MapWidth, int MapHeight)
         {
 
             System.IO.Directory.CreateDirectory("animation");
@@ -2478,9 +2490,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 System.IO.File.Delete(fil);
             }
-            width = ((width / 2) * 2) + 1;
-            height = ((height / 2) * 2) + 1;
-REBOOT:
+            int width = ((MapWidth / 2) * 2) + 1;
+            int height = ((MapHeight / 2) * 2) + 1;
             Bitmap[] tilings = new Bitmap[10];
             for (int i = 0; i < 10; i++)
             {
@@ -2535,12 +2546,12 @@ REBOOT:
                 }
             }
             List<Tuple<int, int>> p = getSoftPath(width / 2, height);
-            foreach (Tuple<int, int> t in p)
+            /*foreach (Tuple<int, int> t in p)
             {
                 grid[t.Item1 + 3, t.Item2] = 9;
                 takenLocations[t.Item1 + 3, t.Item2] = 1;
-            }
-            int numMountains = r.Next(width / 2, width);
+            }*/
+            int numMountains = r.Next((int)(width * 0.25), (int)(width * 0.75));
             int iter = 0;
             int rx = r.Next(width - 2) + 1, ry = r.Next(height - 3) + 2;
             do
@@ -2565,17 +2576,23 @@ REBOOT:
                 iter++;
             } while (iter < numMountains);
 
-            List<Tuple<int, int>> h = getHardPath(width, height / 2);
+            List<Tuple<int, int>> h = getHardPath(width, height / 3);
             foreach (Tuple<int, int> t in h)
             {
                 grid[t.Item1, t.Item2 + 2] = 8;
                 takenLocations[t.Item1, t.Item2 + 2] = 4;
             }
-            h = getHardPath(width, height / 2);
+            h = getHardPath(width, height / 3);
             foreach (Tuple<int, int> t in h)
             {
                 grid[t.Item1, t.Item2 + 2 * ((height / 3 + 3) / 2)] = 8;
                 takenLocations[t.Item1, t.Item2 + 2 * ((height / 3 + 3) / 2)] = 4;
+            }
+            h = getHardPath(width, height / 3);
+            foreach (Tuple<int, int> t in h)
+            {
+                grid[t.Item1, t.Item2 + 2 * ((height / 6 + 6) / 2)] = 8;
+                takenLocations[t.Item1, t.Item2 + 3 * ((height / 3 + 1) / 2)] = 4;
             }
 
             int extreme = 0;
@@ -2649,7 +2666,7 @@ REBOOT:
                 taken[col] = true;
             }
             colors[0] = 0;
-            colors[1] = 4;
+
             int[] targetX = { width / 4, width / 2, width / 4, width / 2, },
                   targetY = { height / 2, height / 4, height / 2, height / 4 };
             for (int section = 0; section < 2; section++)
@@ -2721,7 +2738,7 @@ REBOOT:
                             continue;
                         int currentUnit = TerrainToUnits[grid[i, j]].RandomElement();
                         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
-                        if (r.Next(14) <= 2)
+                        if (r.Next(16) <= 3)
                         {
                             placing[i, j] = new UnitInfo(currentUnit, colors[section], section, i, j);
                             if (guarantee.Count == section)
@@ -2734,6 +2751,19 @@ REBOOT:
                 {
                     int rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
                     int rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
+                    int problems = 0;
+                    while(placing[rgx,rgy] != null)
+                    {
+                        rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
+                        rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
+                        if(placing[rgx,rgy] != null)
+                            problems++;
+                        if (problems > 10)
+                        {
+                            retryGamePreview(MapWidth, MapHeight);
+                            return;
+                        }
+                    }
                     placing[rgx, rgy] = new UnitInfo(TerrainToUnits[grid[rgx, rgy]].RandomElement(), colors[section], section, rgx, rgy);
                     guarantee.Add(new Tuple<int, int>(rgx, rgy));
                 }
@@ -2743,7 +2773,7 @@ REBOOT:
             {
                 for (int j = 3; j < height - 3; j++)
                 {
-                    if (r.Next(18) == 0 && placing[i, j] == null)
+                    if (r.Next(18) <= 1 && placing[i, j] == null)
                     {
                         int rs = r.Next(2);
                         int currentUnit = TerrainToUnits[grid[i, j]].RandomElement();
@@ -2814,6 +2844,7 @@ REBOOT:
             Bitmap b;
             Graphics g;
             int latest = 0;
+
             for (int n = 0; n < 2; n++)
             {
                 for (int u = 0; u < 4; u++)
@@ -2834,13 +2865,17 @@ REBOOT:
                             highlight[i, j] = d[i, j] > 0 && d[i, j] <= active.speed;
                         }
                     }
+
                     List<Tuple<int, int, int>> path = getDijkstraPath(active, grid, placing, targetX[u], targetY[u]);
                     int losses = 0;
                     while (path.Count == 0)
                     {
                         losses++;
-                        if (losses > 10)
-                            goto REBOOT;
+                        if (losses > 5)
+                        {
+                            retryGamePreview(MapWidth, MapHeight);
+                            return;
+                        }
                         placing[active.x, active.y] = new UnitInfo(
                             active.unit,
                             active.color,
@@ -2853,6 +2888,7 @@ REBOOT:
                         temp.facing,
                         temp.x, temp.y);
                         placing[active.x, active.y] = null;
+                        path = getDijkstraPath(active, grid, placing, targetX[u], targetY[u]);
                     }
                     for (int f = -4; f < path.Count * 4; f++)
                     {
@@ -3069,7 +3105,7 @@ REBOOT:
             processUnitOutlined("Estate");
             */
 
-            makeGamePreview(10, 24);
+            makeGamePreview(9, 18);
 
 
             /*
