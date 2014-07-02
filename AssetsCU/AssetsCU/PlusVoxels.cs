@@ -186,7 +186,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         private static float flat_alpha = 0.9991F;
         private static float spin_alpha_0 = 0.9993F;
         private static float spin_alpha_1 = 0.9995F;
-        private static float[][] colors = new float[][]
+        public static float[][] colors = new float[][]
         {
             //0 tires, tread
             new float[] {0.23F,0.2F,0.2F,1F},
@@ -2473,7 +2473,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         static void retryGamePreview(int MapWidth, int MapHeight)
         {
             failCount++;
-            Console.WriteLine("\n\n!!!!!!!!F A I L U R E   " + failCount + " !!!!!!!!\n\n");
+            Console.WriteLine("\n\n!!!!! P A T H F I N D I N G   F A I L U R E   " + failCount + " !!!!!\n\n");
             if (failCount > 10)
             {
                 Console.WriteLine("Too many dijkstra failures.");
@@ -2520,7 +2520,6 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 unitps.Add(FromMagica(bin));
                 bin.Close();
             }
-            Random r = new Random();
 
             //tilings[0].Save("flatgrass.png", ImageFormat.Png);
             /*
@@ -3060,7 +3059,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         {
             Initialize();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 11; i++)
             {
                 PlusPaletteDraw.drawPixelsFlat(i);
             }
@@ -3105,7 +3104,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Estate");
             */
 
-            makeGamePreview(9, 18);
+     //       makeGamePreview(9, 18);
 
 
             /*
