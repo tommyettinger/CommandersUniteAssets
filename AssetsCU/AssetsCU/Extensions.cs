@@ -45,6 +45,20 @@ namespace AssetsCU
 
             return mat[r.Next(mat.GetLength(0)), r.Next(mat.GetLength(1))];
         }
+        public static T[,] Fill<T>(this T[,] mat, T item)
+        {
+            if (mat.Length == 0)
+                return mat;
+
+            for (int i = 0; i < mat.GetLength(0); i++ )
+            {
+                for (int j = 0; j < mat.GetLength(1); j++ )
+                {
+                    mat[i, j] = item;
+                }
+            }
+            return mat;
+        }
         public static PlusVoxels.UnitInfo RandomFactionUnit(this PlusVoxels.UnitInfo[,] mat, int color)
         {
             if (mat.Length == 0)

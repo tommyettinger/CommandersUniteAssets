@@ -369,12 +369,49 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             new float[] {0.4F,0.6F,0.9F,flat_alpha},
             new float[] {0.4F,0.6F,0.9F,flat_alpha},
             new float[] {0.4F,0.6F,0.9F,flat_alpha},
+            
+            //136 smoke (FLAT ALPHA)
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.1F,0.1F,0.1F,flat_alpha},
 
-            //junk, 136-255
-            new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
-            new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
-            new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
-            new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
+            //144 guts
+            new float[] {0.67F,0.05F,-0.1F,1F},  //black
+            new float[] {0.5F,0.8F,-0.2F,1F},      //white
+            new float[] {0.67F,0.05F,-0.1F,1F},  //red
+            new float[] {0.67F,0.05F,-0.1F,1F},  //orange
+            new float[] {0.67F,0.05F,-0.1F,1F},  //yellow
+            new float[] {0.67F,0.05F,-0.1F,1F},  //green
+            new float[] {0.67F,0.05F,-0.1F,1F},  //blue
+            new float[] {0.67F,0.05F,-0.1F,1F},  //purple
+            
+            //152 orange fire
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            new float[] {1.25F,0.7F,0.3F,1F},
+            
+            //160 yellow fire
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+            new float[] {1.25F,1.1F,0.45F,1F},
+
+
+            //junk, 168-255
             new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
             new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
             new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
@@ -417,7 +454,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 x = (byte)(subsample ? stream.ReadByte() / 2 : stream.ReadByte());
                 y = (byte)(subsample ? stream.ReadByte() / 2 : stream.ReadByte());
-                z = (byte)(subsample ? stream.ReadByte() / 2 : stream.ReadByte());
+                z = (byte)((subsample ? stream.ReadByte() / 2 : stream.ReadByte()));
                 color = stream.ReadByte();
             }
         }
@@ -434,8 +471,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             // we're going to return a voxel chunk worth of data
             ushort[] data = new ushort[32 * 128 * 32];
 
-            MagicaVoxelData[] voxelData = null;
-
+            List<MagicaVoxelData> voxelData = new List<MagicaVoxelData>(), voxelsAltered = new List<MagicaVoxelData>();
+            int[,] taken = new int[20,20];
             string magic = new string(stream.ReadChars(4));
             int version = stream.ReadInt32();
 
@@ -458,7 +495,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         sizex = stream.ReadInt32();
                         sizey = stream.ReadInt32();
                         sizez = stream.ReadInt32();
-
+                        taken = new int[sizex, sizey];
+                        taken.Fill(-1);
                         if (sizex > 32 || sizey > 32) subsample = true;
 
                         stream.ReadBytes(chunkSize - 4 * 3);
@@ -470,9 +508,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         int div = (subsample ? 2 : 1);
 
                         // each voxel has x, y, z and color index values
-                        voxelData = new MagicaVoxelData[numVoxels];
-                        for (int i = 0; i < voxelData.Length; i++)
-                            voxelData[i] = new MagicaVoxelData(stream, subsample);
+                        for (int i = 0; i < numVoxels; i++)
+                            voxelData.Add(new MagicaVoxelData(stream, subsample));
                     }
                     else if (chunkName == "RGBA")
                     {
@@ -490,21 +527,49 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     else stream.ReadBytes(chunkSize);   // read any excess bytes
                 }
 
-                if (voxelData.Length == 0) return voxelData; // failed to read any valid voxel data
+                if (voxelData.Count == 0) return voxelData.ToArray(); // failed to read any valid voxel data
 
                 // now push the voxel data into our voxel chunk structure
-                for (int i = 0; i < voxelData.Length; i++)
+                for (int i = 0; i < voxelData.Count; i++)
                 {
                     // do not store this voxel if it lies out of range of the voxel chunk (32x128x32)
                     if (voxelData[i].x > 31 || voxelData[i].y > 31 || voxelData[i].z > 127) continue;
 
+                    voxelsAltered.Add(voxelData[i]);
+                    if (-1 == taken[voxelData[i].x, voxelData[i].y] && voxelData[i].color != 249 - 80 && voxelData[i].color != 249 - 104 && voxelData[i].color != 249 - 112
+                         && voxelData[i].color != 249 - 96 && voxelData[i].color != 249 - 128 && voxelData[i].color != 249 - 136)
+                    {
+                        MagicaVoxelData vox = new MagicaVoxelData();
+                        vox.x = voxelData[i].x;
+                        vox.y = voxelData[i].y;
+                        vox.z = (byte)(0);
+                        vox.color = 249-96;
+                        taken[vox.x, vox.y] = voxelsAltered.Count();
+                        voxelsAltered.Add(vox);
+                   }
                     // use the voxColors array by default, or overrideColor if it is available
-                    int voxel = (voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128);
                     //data[voxel] = (colors == null ? voxColors[voxelData[i].color - 1] : colors[voxelData[i].color - 1]);
                 }
             }
+/*            taken.Fill(-1);
+            foreach (MagicaVoxelData mvd in voxelsAltered.FindAll(v => v.z == 0))
+            {
+                taken[mvd.x, mvd.y] = 2;
+            }
+            foreach (MagicaVoxelData mvd in voxelsAltered.FindAll(v => v.z >= 100))
+            {
+                if(taken[mvd.x, mvd.y] != 2)
+                {
+                    MagicaVoxelData vox = new MagicaVoxelData();
+                    vox.x = mvd.x;
+                    vox.y = mvd.y;
+                    vox.z = (byte)(0);
+                    vox.color = 249 - 96;
+                    voxelData.Add(vox);
+                }
+            }*/
 
-            return voxelData;
+            return voxelsAltered.ToArray();
         }
 
 
@@ -570,11 +635,12 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 colours[i] = colors[i];
             }
 
-            for (int i = 1; i < 18; i++)
+            for (int i = 1; i < 23; i++)
             {
                 float alpha = 1F;
                 switch (i)
                 {
+                    case 18: alpha = flat_alpha; break;
                     case 17: alpha = flat_alpha; break;
                     case 13: alpha = flat_alpha; break;
                     case 14: alpha = spin_alpha_0; break;
@@ -593,17 +659,17 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 }
                 else
                 {
-                    colors[(i - 1) * 8 + 0] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 1] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 2] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 3] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 4] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 5] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 6] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
-                    colors[(i - 1) * 8 + 7] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 0] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 1] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 2] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 3] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 4] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 5] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 6] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
+                    colors[(i - 1) * 8 + 7] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (22 - i), alpha };
                 }
             }
-            for (int i = 136; i < 256; i++)
+            for (int i = 168; i < 256; i++)
             {
                 colors[i] = new float[] { 0, 0, 0, 1 };
             }
@@ -744,7 +810,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             int jitter = (frame % 3) + (frame / 3);
             if (maxFrames != 4)
                 jitter = 0;
-            foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
+            foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128 - ((v.color == 249-96) ? 32*128*32:0))) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
             {
                 int current_color = 249 - vx.color;
                 // Console.Write(current_color + "  ");
@@ -855,7 +921,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             int jitter = (frame % 3) + (frame / 3);
             if (maxFrames != 4)
                 jitter = 0;
-            foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
+            foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128 - ((v.color == 249 - 96) ? 32 * 128 * 32 : 0))) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
             {
                 int current_color = 249 - vx.color;
 
@@ -1064,7 +1130,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                            ColorAdjustType.Bitmap);
                         g.DrawImage(spin, new Rectangle(1 + 3 * (10 + i), 0, width, height), 0, 0, width, height, GraphicsUnit.Pixel, imageAttributes);
             }
-            for (int v = 11; v < 17; v++)
+            for (int v = 11; v < 23; v++)
             {
                 int current_color = v * 8;
 
@@ -1100,7 +1166,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                ColorMatrixFlag.Default,
                ColorAdjustType.Bitmap);
             g.DrawImage(outline,
-               new Rectangle(1 + 3 * 20, 0,
+               new Rectangle(1 + 3 * 26, 0,
                    8, 8),  // destination rectangle 
                 //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                1, 1,        // upper-left corner of source rectangle 
@@ -3550,7 +3616,12 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
             System.IO.Directory.CreateDirectory("Palettes");
             System.IO.Directory.CreateDirectory("indexed");
-
+            
+            for (int c = 0; c < 8; c++)
+            {
+                renderOnlyColors(c).Save("PaletteColor" + c + ".png", ImageFormat.Png);
+                renderOnlyTerrainColors(c).Save("PaletteTerrainColor" + c + ".png", ImageFormat.Png);
+            }
             InitializePalettes();
 
             /*for (int c = 0; c < 8; c++)
@@ -3563,21 +3634,17 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 File.WriteAllLines("Palettes/color" + c + ".txt", ls);
             }*/
 
-            /*
-            for (int c = 0; c < 8; c++)
-            {
-                renderOnlyTerrainColors(c).Save("PaletteTerrainColor" +c+ ".png", ImageFormat.Png);
-            }*/
-           // Madden();
-           // renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
+            
+            Madden();
+            renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
 
            // CreateIndexedBitmap(new Bitmap("crazy/Infantry_face0_0.png"), "redefined_Infantry_color1.png", 1);
 
             processTerrainChannel();
 
             //processUnitOutlined("Block");
-            /*
-            Madden();
+            
+            //Madden();
 
             processUnitChannel("Infantry");
             processUnitChannel("Infantry_P");
@@ -3618,8 +3685,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             
 
 
-            */
-
+            
+            /*
             processUnitOutlined("Copter");
             processUnitOutlined("Copter_P");
             processUnitOutlined("Copter_S");
@@ -3658,7 +3725,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Castle");
             processUnitOutlined("Estate");
             
-             
+             */
 
             //       makeGamePreview(9, 18);
 
