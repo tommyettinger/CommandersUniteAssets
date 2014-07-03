@@ -8,7 +8,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 
-
 namespace AssetsCU
 {
 
@@ -294,13 +293,13 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
             //80 lights
             new float[] {1.0F,1.0F,0.5F,1F},        //black
-            new float[] {0.6F,1.4F,0.6F,1F},         //white
+            new float[] {0.5F,1.2F,0.6F,1F},         //white
             new float[] {1.1F,0.9F,0.5F,1F},        //red
             new float[] {1.1F,0.9F,0.5F,1F},        //orange
             new float[] {1.05F,0.65F,0.15F,1F},        //yellow
-            new float[] {1F,1.1F,0.6F,1F},        //green
-            new float[] {1F,1F,0.6F,1F},        //blue
-            new float[] {1F,1F,0.4F,1F},        //purple
+            new float[] {0.9F,1.1F,0.5F,1F},        //green
+            new float[] {0.9F,0.8F,0.65F,1F},        //blue
+            new float[] {0.95F,0.9F,0.45F,1F},        //purple
 
             //88 windows
             new float[] {0.3F,0.5F,0.5F,1F},
@@ -406,6 +405,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 /*            new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},
             new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F}, new float[] {0F,0F,0F,0F},*/
         };
+        public static float[][] colours = new float[256][];
         private struct MagicaVoxelData
         {
             public byte x;
@@ -508,6 +508,132 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         }
 
 
+        private static bool PalettesInitialized = false;
+        private static List<Color>[] SDPalettes = new List<Color>[9];
+        public static void InitializePalettes()
+        {
+            Bitmap b;
+            b = new Bitmap(256, 8, PixelFormat.Format32bppArgb);
+            for (int c = 0; c < 9; c++)
+            {
+                Bitmap bmp;
+                if (c == 8)
+                    bmp = new Bitmap("PaletteCrazy.png");
+                else
+                    bmp = new Bitmap("PaletteColor" + c + ".png");
+                SDPalettes[c] = new List<Color>();
+                for (int i = 0; i < bmp.Width; i+=(i%3)+1)
+                {
+                    SDPalettes[c].Add(bmp.GetPixel(i, 0));
+                    SDPalettes[c].Add(bmp.GetPixel(i, 3));
+                    
+                }
+                if(c == 8)
+                {
+                    b.Save("Palettes/octa.png", ImageFormat.Png);
+                    b.Dispose();
+                    bmp.Dispose();
+                    break;
+                }
+                for (int cl = 0; cl < SDPalettes[c].Count; cl++)
+                {
+                    b.SetPixel(cl, c, SDPalettes[c][cl]);
+                }
+                for (int cl = SDPalettes[c].Count; cl < 256; cl++)
+                {
+                    b.SetPixel(cl, c, Color.Black);
+                }
+                Console.WriteLine("Color "+ c + " has: " + SDPalettes[c].Count + " entries.");
+                //SDPalettes[c] = colors;
+                
+                bmp.Dispose();
+            }
+            GC.Collect();
+            PalettesInitialized = true;
+
+        }
+        public static void Madden()
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                colours[i] = colors[i];
+            }
+
+            for (int i = 1; i < 18; i++)
+            {
+                float alpha = 1F;
+                switch (i)
+                {
+                    case 17: alpha = flat_alpha; break;
+                    case 13: alpha = flat_alpha; break;
+                    case 14: alpha = spin_alpha_0; break;
+                    case 15: alpha = spin_alpha_1; break;
+                }
+                if (i == 11)
+                {
+                    colors[(i - 1) * 8 + 0] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 1] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 2] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 3] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 4] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 5] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 6] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                    colors[(i - 1) * 8 + 7] = new float[] { 1.0F, 1.0F, 0.5F, 1F };
+                }
+                else
+                {
+                    colors[(i - 1) * 8 + 0] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 1] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 2] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 3] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 4] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 5] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 6] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                    colors[(i - 1) * 8 + 7] = new float[] { 1 / i, 1F / i * 1.5F, 0.9F / (18 - i), alpha };
+                }
+            }
+            for (int i = 136; i < 256; i++)
+            {
+                colors[i] = new float[] { 0, 0, 0, 1 };
+            }
+        }
+        public static void Awaken()
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                colors[i] = colours[i];
+            }
+        }
+        public static void CreateChannelBitmap(Bitmap bmp, string savename)
+        {
+            if (PalettesInitialized == false)
+                return;
+            Bitmap b = new Bitmap(bmp);
+            //byte[] array = new byte[bmp.Width * bmp.Height];
+
+            for (int x = 0; x < bmp.Width; x++)
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    int cb = (SDPalettes[8].FindByIndex(bmp.GetPixel(x, y)));
+                    if (cb != -1)
+                        b.SetPixel(x, y, Color.FromArgb(cb, 0, 0));
+                    else
+                        Console.WriteLine("Color not found at: " + x + ", " + y);
+
+                        //array[bmp.Width * y + x] = (byte)cb;
+                }
+            b.Save(savename, ImageFormat.Png);
+            //BitmapSource bitmap = BitmapSource.Create(bmp.Width, bmp.Height, 96, 96, Media.PixelFormats.Indexed8, Palettes[palette], array, bmp.Width);
+            /*
+            using (FileStream stream = new FileStream(savename, FileMode.Create))
+            {
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                // encoder.Palette = Palettes[palette];
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                encoder.Save(stream);
+            }*/
+        }
+
         private static Bitmap render(MagicaVoxelData[] voxels, int facing, int faction, int frame, int maxFrames)
         {
             Bitmap b = new Bitmap(80, 100, PixelFormat.Format32bppArgb);
@@ -534,7 +660,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                ColorMatrixFlag.Default,
                ColorAdjustType.Bitmap);
             MagicaVoxelData[] vls = new MagicaVoxelData[voxels.Length];
-            switch(facing)
+            switch (facing)
             {
                 case 0:
                     vls = voxels;
@@ -579,15 +705,15 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
             {
                 int current_color = 249 - vx.color;
-               // Console.Write(current_color + "  ");
-                if ((frame%2 != 0) && colors[current_color + faction][3] == spin_alpha_0)
+                // Console.Write(current_color + "  ");
+                if ((frame % 2 != 0) && colors[current_color + faction][3] == spin_alpha_0)
                     continue;
                 else if ((frame % 2 != 1) && colors[current_color + faction][3] == spin_alpha_1)
                     continue;
 
                 if (current_color == 80) //lights
                 {
-                    float lightCalc = (0.5F - ((frame % 3) - (frame / 3))) * 0.12F;
+                    float lightCalc = (0.5F - ((frame % 3) + (frame / 3))) * 0.12F;
                     colorMatrix = new ColorMatrix(new float[][]{ 
    new float[] {0.22F+colors[current_color + faction][0] + lightCalc,  0,  0,  0, 0},
    new float[] {0,  0.251F+colors[current_color + faction][1] + lightCalc,  0,  0, 0},
@@ -608,7 +734,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                    colorMatrix,
                    ColorMatrixFlag.Default,
                    ColorAdjustType.Bitmap);
-                g.DrawImage(
+                g.DrawImage((current_color == 80) ? spin :
                    (colors[current_color + faction][3] == 1F) ? image : (colors[current_color + faction][3] == flat_alpha) ? flat : spin,
                    new Rectangle((vx.x + vx.y) * 2, 100 - 24 - vx.y + vx.x - vx.z * 3 - ((colors[current_color + faction][3] == flat_alpha) ? -2 : jitter)
                        , width, height),  // destination rectangle 
@@ -713,6 +839,207 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             return b;
         }
+        private static Bitmap renderOnlyColors()
+        {
+            Bitmap b = new Bitmap(128, 4, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage((Image)b);
+            Image image = new Bitmap("cube_soft.png");
+            //            Image gray = new Bitmap("cube_gray_soft.png");
+            //Image reversed = new Bitmap("cube_reversed.png");
+            ImageAttributes imageAttributes = new ImageAttributes();
+            int width = 4;
+            int height = 4;
+            float[][] flatcolors = PlusPaletteDraw.flatcolors;
+            for (int color = 0; color < 11; color++)
+            {
+                //g.DrawImage(image, 10, 10, width, height);
+                float merged = (flatcolors[color][0] + flatcolors[color][1] + flatcolors[color][2]) * 0.45F;
+
+
+                ColorMatrix colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {(merged + flatcolors[color][0]) * 0.5F,  0,  0,  0, 0},
+   new float[] {0,  (merged + flatcolors[color][1]) * 0.5F,  0,  0, 0},
+   new float[] {0,  0,  (merged + flatcolors[color][2]) * 0.5F,  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                ColorMatrix colorMatrixDark = new ColorMatrix(new float[][]{ 
+   new float[] {merged*0.3F + flatcolors[color][0] * 0.5F,  0,  0,  0, 0},
+   new float[] {0,  merged*0.3F + flatcolors[color][1] * 0.52F,  0,  0, 0},
+   new float[] {0,  0,  merged*0.3F + flatcolors[color][2] * 0.58F,  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                ColorMatrix colorMatrixBright = new ColorMatrix(new float[][]{ 
+   new float[] {merged*0.55F + flatcolors[color][0] * 0.85F,  0,  0,  0, 0},
+   new float[] {0,  merged*0.55F + flatcolors[color][1] * 0.85F,  0,  0, 0},
+   new float[] {0,  0,  merged*0.55F + flatcolors[color][2] * 0.85F,  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+
+                imageAttributes.SetColorMatrix(
+                   colorMatrix,
+                   ColorMatrixFlag.Default,
+                   ColorAdjustType.Bitmap);
+                g.DrawImage(
+                  image,
+                   new Rectangle(1 + 9 * color, 0,
+                       width, height),  // destination rectangle 
+                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
+                imageAttributes.SetColorMatrix(
+                   colorMatrixDark,
+                   ColorMatrixFlag.Default,
+                   ColorAdjustType.Bitmap);
+                g.DrawImage(
+                  image,
+                   new Rectangle(4 + 9 * color, 0,
+                       width, height),  // destination rectangle 
+                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
+                imageAttributes.SetColorMatrix(
+                   colorMatrixBright,
+                   ColorMatrixFlag.Default,
+                   ColorAdjustType.Bitmap);
+                g.DrawImage(
+                  image,
+                   new Rectangle(7 + 9 * color, 0,
+                       width, height),  // destination rectangle 
+                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
+            }
+            return b;
+        }
+        private static Bitmap renderOnlyColors(int faction)
+        {
+            Bitmap b = new Bitmap(128, 4, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage((Image)b);
+            //Image image = new Bitmap("cube_large.png");
+            Image image = new Bitmap("cube_soft.png");
+            Image flat = new Bitmap("flat_soft.png");
+            Image spin = new Bitmap("spin_soft.png");
+            Image outline = new Bitmap("black_outline_soft.png");
+            ImageAttributes imageAttributes = new ImageAttributes();
+            int width = 4;
+            int height = 4;
+            float[][] colorMatrixElements = { 
+   new float[] {1F, 0,  0,  0,  0},
+   new float[] {0, 1F,  0,  0,  0},
+   new float[] {0,  0,  1F, 0,  0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0,  0,  0,  0, 1F}};
+
+            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+
+            imageAttributes.SetColorMatrix(
+               colorMatrix,
+               ColorMatrixFlag.Default,
+               ColorAdjustType.Bitmap);
+            //            if (maxFrames != 4)
+            //              jitter = 0;
+            for (int v = 0; v < 10; v++)
+            {
+                int current_color = v * 8;
+
+                    colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {0.22F+colors[current_color + faction][0],  0,  0,  0, 0},
+   new float[] {0,  0.251F+colors[current_color + faction][1],  0,  0, 0},
+   new float[] {0,  0,  0.31F+colors[current_color + faction][2],  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                
+                imageAttributes.SetColorMatrix(
+                   colorMatrix,
+                   ColorMatrixFlag.Default,
+                   ColorAdjustType.Bitmap);
+                g.DrawImage(
+                   (colors[current_color + faction][3] == 1F) ? image : (colors[current_color + faction][3] == flat_alpha) ? flat : spin,
+                   new Rectangle(1+3*v, 0,
+                       width, height),  // destination rectangle 
+                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
+            }
+            float[] lightCalcs = {
+                                             (0.5F - (0 - 0)) * 0.12F,
+                                             (0.5F - (1 - 0)) * 0.12F,
+                                             (0.5F - (2 - 0)) * 0.12F,
+                                             (0.5F - (0 + 1)) * 0.12F,};
+            for(int i = 0; i < 4; i++)
+            {
+                        colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {0.22F+colors[80 + faction][0] + lightCalcs[i],  0,  0,  0, 0},
+   new float[] {0,  0.251F+colors[80 + faction][1] + lightCalcs[i],  0,  0, 0},
+   new float[] {0,  0,  0.31F+colors[80 + faction][2] + lightCalcs[i],  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                        imageAttributes.SetColorMatrix(
+                           colorMatrix,
+                           ColorMatrixFlag.Default,
+                           ColorAdjustType.Bitmap);
+                        g.DrawImage(spin, new Rectangle(1 + 3 * (10 + i), 0, width, height), 0, 0, width, height, GraphicsUnit.Pixel, imageAttributes);
+            }
+            for (int v = 11; v < 17; v++)
+            {
+                int current_color = v * 8;
+
+                    colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {0.22F+colors[current_color + faction][0],  0,  0,  0, 0},
+   new float[] {0,  0.251F+colors[current_color + faction][1],  0,  0, 0},
+   new float[] {0,  0,  0.31F+colors[current_color + faction][2],  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                imageAttributes.SetColorMatrix(
+                   colorMatrix,
+                   ColorMatrixFlag.Default,
+                   ColorAdjustType.Bitmap);
+                g.DrawImage(
+                   (colors[current_color + faction][3] == 1F) ? image : (colors[current_color + faction][3] == flat_alpha) ? flat : spin,
+                   new Rectangle(1 + 3 * (v+3), 0,
+                       width, height),  // destination rectangle 
+                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
+            }
+            colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {1F, 0,  0,  0,  0},
+   new float[] {0, 1F,  0,  0,  0},
+   new float[] {0,  0,  1F, 0,  0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0,  0,  0,  0, 1F}});
+            imageAttributes.SetColorMatrix(
+               colorMatrix,
+               ColorMatrixFlag.Default,
+               ColorAdjustType.Bitmap);
+            g.DrawImage(outline,
+               new Rectangle(1 + 3 * 20, 0,
+                   8, 8),  // destination rectangle 
+                //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+               1, 1,        // upper-left corner of source rectangle 
+               8,       // width of source rectangle
+               8,      // height of source rectangle
+               GraphicsUnit.Pixel,
+               imageAttributes);
+
+            return b;
+        }
+
 
 
         private static Bitmap drawPixelsSE(MagicaVoxelData[] voxels, int faction, int frame)
@@ -1240,11 +1567,11 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         {
             BinaryReader bin = new BinaryReader(File.Open(u + "_X.vox", FileMode.Open));
             MagicaVoxelData[] parsed = FromMagica(bin);
-            
+
             for (int i = 0; i < 8; i++)
             {
                 System.IO.Directory.CreateDirectory(u);
-                for(int face = 0; face < 4; face++)
+                for (int face = 0; face < 4; face++)
                 {
                     Bitmap b = render(parsed, face, i, 0, 4);
                     b.Save(u + "/color" + i + "_face" + face + "_" + Directions[face] + "_frame" + 0 + "_.png", ImageFormat.Png);
@@ -1285,19 +1612,39 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             BinaryReader bin = new BinaryReader(File.Open(u + "_X.vox", FileMode.Open));
             MagicaVoxelData[] parsed = FromMagica(bin);
             int framelimit = 4;
-            if(CurrentMobilities[UnitLookup[u]] == MovementType.Immobile)
+            if (!UnitLookup.ContainsKey(u))
+            {
+                framelimit = 4;
+                Bitmap b = new Bitmap(56, 108);
+                Graphics g = Graphics.FromImage(b);
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int f = 0; f < framelimit; f++)
+                    {
+                        g.DrawImage(processSingleOutlined(parsed, i, "SE", f, framelimit), -16, (f - 2) * 26);
+                    }
+                    b.Save("color" + i + "_" + u + ".png", ImageFormat.Png);
+                }
+                bin.Close();
+                return;
+            }
+            else if (CurrentMobilities[UnitLookup[u]] == MovementType.Immobile)
             {
                 framelimit = 2;
             }
+
             for (int i = 0; i < 8; i++)
             {
-                System.IO.Directory.CreateDirectory("color" + i);
+                string folder = ("color" + i);//"color" + i;
+                System.IO.Directory.CreateDirectory(folder); //("color" + i);
                 for (int f = 0; f < framelimit; f++)
-                {
-                    processSingleOutlined(parsed, i, "SE", f, framelimit).Save("color" + i + "/" + u + "_face0" + "_" + f + ".png", ImageFormat.Png); //se
-                    processSingleOutlined(parsed, i, "SW", f, framelimit).Save("color" + i + "/" + u + "_face1" + "_" + f + ".png", ImageFormat.Png); //sw
-                    processSingleOutlined(parsed, i, "NW", f, framelimit).Save("color" + i + "/" + u + "_face2" + "_" + f + ".png", ImageFormat.Png); //nw
-                    processSingleOutlined(parsed, i, "NE", f, framelimit).Save("color" + i + "/" + u + "_face3" + "_" + f + ".png", ImageFormat.Png); //ne
+                { //"color" + i + "/"
+
+                    processSingleOutlined(parsed, i, "SE", f, framelimit).Save(folder + "/" + u + "_face0" + "_" + f + ".png", ImageFormat.Png); //se
+                    processSingleOutlined(parsed, i, "SW", f, framelimit).Save(folder + "/" + u + "_face1" + "_" + f + ".png", ImageFormat.Png); //sw
+                    processSingleOutlined(parsed, i, "NW", f, framelimit).Save(folder + "/" + u + "_face2" + "_" + f + ".png", ImageFormat.Png); //nw
+                    processSingleOutlined(parsed, i, "NE", f, framelimit).Save(folder + "/" + u + "_face3" + "_" + f + ".png", ImageFormat.Png); //ne
+
                 }
 
             }
@@ -1310,7 +1657,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             */
             bin.Close();
 
-            if(File.Exists(u + "_Firing_X.vox"))
+            if (File.Exists(u + "_Firing_X.vox"))
             {
                 Console.WriteLine("Processing: " + u + " Firing");
                 bin = new BinaryReader(File.Open(u + "_Firing_X.vox", FileMode.Open));
@@ -1320,15 +1667,19 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     framelimit = 2;
                 }
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < 1; i++)
                 {
-                    System.IO.Directory.CreateDirectory(u);
+
+                    string folder = "color" + i; ;//
+                    //System.IO.Directory.CreateDirectory(u);
                     for (int f = 0; f < framelimit; f++)
                     {
-                        processSingleOutlined(parsed, i, "SE", f, framelimit).Save("color" + i + "/" + u + "_Firing" + "_face0" + "_" + f + ".png", ImageFormat.Png); //se
-                        processSingleOutlined(parsed, i, "SW", f, framelimit).Save("color" + i + "/" + u + "_Firing" + "_face1" + "_" + f + ".png", ImageFormat.Png); //sw
-                        processSingleOutlined(parsed, i, "NW", f, framelimit).Save("color" + i + "/" + u + "_Firing" + "_face2" + "_" + f + ".png", ImageFormat.Png); //nw
-                        processSingleOutlined(parsed, i, "NE", f, framelimit).Save("color" + i + "/" + u + "_Firing" + "_face3" + "_" + f + ".png", ImageFormat.Png); //ne
+
+                        processSingleOutlined(parsed, i, "SE", f, framelimit).Save(folder + "/" + u + "_Firing" + "_face0" + "_" + f + ".png", ImageFormat.Png); //se
+                        processSingleOutlined(parsed, i, "SW", f, framelimit).Save(folder + "/" + u + "_Firing" + "_face1" + "_" + f + ".png", ImageFormat.Png); //sw
+                        processSingleOutlined(parsed, i, "NW", f, framelimit).Save(folder + "/" + u + "_Firing" + "_face2" + "_" + f + ".png", ImageFormat.Png); //nw
+                        processSingleOutlined(parsed, i, "NE", f, framelimit).Save(folder + "/" + u + "_Firing" + "_face3" + "_" + f + ".png", ImageFormat.Png); //ne
+
                     }
 
                 }
@@ -1340,229 +1691,279 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 bin.Close();
             }
         }
-/*        private static void processBases()
+
+        private static void processUnitChannel(string u)
         {
-            BinaryReader[] powers = new BinaryReader[8];
-            BinaryReader[] speeds = new BinaryReader[8];
-            BinaryReader[] techniques = new BinaryReader[8];
 
-
-            MagicaVoxelData[][] basepowers = new MagicaVoxelData[8][];
-            MagicaVoxelData[][] basespeeds = new MagicaVoxelData[8][];
-            MagicaVoxelData[][] basetechniques = new MagicaVoxelData[8][];
-
-            for (int i = 0; i < 8; i++)
-            {
-                powers[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_P_" + i + ".vox"));
-                basepowers[i] = FromMagica(powers[i]);
-                speeds[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_S_" + i + ".vox"));
-                basespeeds[i] = FromMagica(speeds[i]);
-                techniques[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_T_" + i + ".vox"));
-                basetechniques[i] = FromMagica(techniques[i]);
-
-            }
-
-            System.IO.Directory.CreateDirectory("Power");
-            System.IO.Directory.CreateDirectory("Speed");
-            System.IO.Directory.CreateDirectory("Technique");
-            Graphics g;
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-
-
-                    Bitmap power = drawPixelsSE(basepowers[j], i, 0), oPower = drawOutlineSE(basepowers[j], i, 0);
-                    g = Graphics.FromImage(oPower);
-                    g.DrawImage(power, 2, 2);
-                    oPower.Save("Power/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
-
-                    Bitmap speed = drawPixelsSE(basespeeds[j], i, 0), oSpeed = drawOutlineSE(basespeeds[j], i, 0);
-                    g = Graphics.FromImage(oSpeed);
-                    g.DrawImage(speed, 2, 2);
-                    oSpeed.Save("Speed/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
-
-                    Bitmap technique = drawPixelsSE(basetechniques[j], i, 0), oTechnique = drawOutlineSE(basetechniques[j], i, 0);
-                    g = Graphics.FromImage(oTechnique);
-                    g.DrawImage(technique, 2, 2);
-                    oTechnique.Save("Technique/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
-                }
-            }
-
-            for (int i = 0; i < 8; i++)
-            {
-                powers[i].Close();
-                speeds[i].Close();
-                techniques[i].Close();
-            }
-        }
-        private static void processUnit(string u)
-        {
+            Console.WriteLine("Processing: " + u);
             BinaryReader bin = new BinaryReader(File.Open(u + "_X.vox", FileMode.Open));
             MagicaVoxelData[] parsed = FromMagica(bin);
-
-            BinaryReader[] bases = {
-                                   new BinaryReader(File.Open("Base_Power.vox", FileMode.Open)),
-                                   new BinaryReader(File.Open("Base_Speed.vox", FileMode.Open)),
-                                   new BinaryReader(File.Open("Base_Technique.vox", FileMode.Open))
-            };
-            BinaryReader[] powers = new BinaryReader[8];
-            BinaryReader[] speeds = new BinaryReader[8];
-            BinaryReader[] techniques = new BinaryReader[8];
-
-
-            MagicaVoxelData[][] basepowers = new MagicaVoxelData[8][];
-            MagicaVoxelData[][] basespeeds = new MagicaVoxelData[8][];
-            MagicaVoxelData[][] basetechniques = new MagicaVoxelData[8][];
-
-            for (int i = 0; i < 8; i++)
+            int framelimit = 4;
+            if (CurrentMobilities[UnitLookup[u]] == MovementType.Immobile)
             {
-                powers[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_P_" + i + ".vox"));
-                basepowers[i] = FromMagica(powers[i]);
-                speeds[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_S_" + i + ".vox"));
-                basespeeds[i] = FromMagica(speeds[i]);
-                techniques[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_T_" + i + ".vox"));
-                basetechniques[i] = FromMagica(techniques[i]);
-
+                framelimit = 2;
             }
-            for (int i = 0; i < 8; i++)
-            {
-                System.IO.Directory.CreateDirectory(u);
-                System.IO.Directory.CreateDirectory(u + "color" + i);
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/power");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/power/SE");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/power/SW");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/power/NW");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/power/NE");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/speed");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/SE");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/SW");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/NW");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/NE");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/technique");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/SE");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/SW");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/NW");
-                System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/NE");
-                Bitmap bSE = drawPixelsSE(parsed, i, 0);
-                bSE.Save(u + "/color" + i + "_" + u + "_default_SE" + ".png", ImageFormat.Png);
-                Bitmap bSW = drawPixelsSW(parsed, i, 0);
-                bSW.Save(u + "/color" + i + "_" + u + "_default_SW" + ".png", ImageFormat.Png);
-                Bitmap bNW = drawPixelsNW(parsed, i, 0);
-                bNW.Save(u + "/color" + i + "_" + u + "_default_NW" + ".png", ImageFormat.Png);
-                Bitmap bNE = drawPixelsNE(parsed, i, 0);
-                bNE.Save(u + "/color" + i + "_" + u + "_default_NE" + ".png", ImageFormat.Png);
-                for (int j = 0; j < 8; j++)
-                {
-                    Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
-                    Graphics g = Graphics.FromImage(power);
-                    g.DrawImage(bSE, 0, 0);
-                    power.Save(u + "color" + i + "/power/SE/" + j + ".png", ImageFormat.Png);
 
-                    Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
-                    g = Graphics.FromImage(speed);
-                    g.DrawImage(bSE, 0, 0);
-                    speed.Save(u + "color" + i + "/speed/SE/" + j + ".png", ImageFormat.Png);
+                System.IO.Directory.CreateDirectory("indexed"); //("color" + i);
+                for (int f = 0; f < framelimit; f++)
+                { //"color" + i + "/"
 
-                    Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
-                    g = Graphics.FromImage(technique);
-                    g.DrawImage(bSE, 0, 0);
-                    technique.Save(u + "color" + i + "/technique/SE/" + j + ".png", ImageFormat.Png);
+                    CreateChannelBitmap(processSingleOutlined(parsed, 0, "SE", f, framelimit), "indexed/" + u + "_face0" + "_" + f + ".png");
+                    CreateChannelBitmap(processSingleOutlined(parsed, 0, "SW", f, framelimit), "indexed/" + u + "_face1" + "_" + f + ".png");
+                    CreateChannelBitmap(processSingleOutlined(parsed, 0, "NW", f, framelimit), "indexed/" + u + "_face2" + "_" + f + ".png");
+                    CreateChannelBitmap(processSingleOutlined(parsed, 0, "NE", f, framelimit), "indexed/" + u + "_face3" + "_" + f + ".png");
+
                 }
-                for (int j = 0; j < 8; j++)
-                {
-                    Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
-                    Graphics g = Graphics.FromImage(power);
-                    g.DrawImage(bSW, 0, 0);
-                    power.Save(u + "color" + i + "/power/SW/" + j + ".png", ImageFormat.Png);
-
-                    Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
-                    g = Graphics.FromImage(speed);
-                    g.DrawImage(bSW, 0, 0);
-                    speed.Save(u + "color" + i + "/speed/SW/" + j + ".png", ImageFormat.Png);
-
-                    Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
-                    g = Graphics.FromImage(technique);
-                    g.DrawImage(bSW, 0, 0);
-                    technique.Save(u + "color" + i + "/technique/SW/" + j + ".png", ImageFormat.Png);
-                }
-                for (int j = 0; j < 8; j++)
-                {
-                    Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
-                    Graphics g = Graphics.FromImage(power);
-                    g.DrawImage(bNE, 0, 0);
-                    power.Save(u + "color" + i + "/power/NE/" + j + ".png", ImageFormat.Png);
-
-                    Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
-                    g = Graphics.FromImage(speed);
-                    g.DrawImage(bNE, 0, 0);
-                    speed.Save(u + "color" + i + "/speed/NE/" + j + ".png", ImageFormat.Png);
-
-                    Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
-                    g = Graphics.FromImage(technique);
-                    g.DrawImage(bNE, 0, 0);
-                    technique.Save(u + "color" + i + "/technique/NE/" + j + ".png", ImageFormat.Png);
-                }
-                for (int j = 0; j < 8; j++)
-                {
-                    Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
-                    Graphics g = Graphics.FromImage(power);
-                    g.DrawImage(bNW, 0, 0);
-                    power.Save(u + "color" + i + "/power/NW/" + j + ".png", ImageFormat.Png);
-
-                    Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
-                    g = Graphics.FromImage(speed);
-                    g.DrawImage(bNW, 0, 0);
-                    speed.Save(u + "color" + i + "/speed/NW/" + j + ".png", ImageFormat.Png);
-
-                    Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
-                    g = Graphics.FromImage(technique);
-                    g.DrawImage(bNW, 0, 0);
-                    technique.Save(u + "color" + i + "/technique/NW/" + j + ".png", ImageFormat.Png);
-                }
-                ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
-                startInfo.UseShellExecute = false;
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/SE/* " + u + "/color" + i + "_" + u + "_power_SE.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/SE/* " + u + "/color" + i + "_" + u + "_speed_SE.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/SE/* " + u + "/color" + i + "_" + u + "_technique_SE.gif";
-                Process.Start(startInfo).WaitForExit();
-
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/SW/* " + u + "/color" + i + "_" + u + "_power_SW.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/SW/* " + u + "/color" + i + "_" + u + "_speed_SW.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/SW/* " + u + "/color" + i + "_" + u + "_technique_SW.gif";
-                Process.Start(startInfo).WaitForExit();
-
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/NW/* " + u + "/color" + i + "_" + u + "_power_NW.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/NW/* " + u + "/color" + i + "_" + u + "_speed_NW.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/NW/* " + u + "/color" + i + "_" + u + "_technique_NW.gif";
-                Process.Start(startInfo).WaitForExit();
-
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/NE/* " + u + "/color" + i + "_" + u + "_power_NE.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/NE/* " + u + "/color" + i + "_" + u + "_speed_NE.gif";
-                Process.Start(startInfo).WaitForExit();
-                startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/NE/* " + u + "/color" + i + "_" + u + "_technique_NE.gif";
-                Process.Start(startInfo).WaitForExit();
-
-            }
             bin.Close();
-            bases[0].Close();
-            bases[1].Close();
-            bases[2].Close();
-            for (int i = 0; i < 8; i++)
+
+            if (File.Exists(u + "_Firing_X.vox"))
             {
-                powers[i].Close();
-                speeds[i].Close();
-                techniques[i].Close();
+                Console.WriteLine("Processing: " + u + " Firing");
+                bin = new BinaryReader(File.Open(u + "_Firing_X.vox", FileMode.Open));
+                parsed = FromMagica(bin);
+                framelimit = 4;
+                if (CurrentMobilities[UnitLookup[u]] == MovementType.Immobile)
+                {
+                    framelimit = 2;
+                }
+
+                    //System.IO.Directory.CreateDirectory(u);
+                    for (int f = 0; f < framelimit; f++)
+                    {
+                        CreateChannelBitmap(processSingleOutlined(parsed, 0, "SE", f, framelimit), "indexed/" + u + "_Firing" + "_face0" + "_" + f + ".png");
+                        CreateChannelBitmap(processSingleOutlined(parsed, 0, "SW", f, framelimit), "indexed/" + u + "_Firing" + "_face1" + "_" + f + ".png");
+                        CreateChannelBitmap(processSingleOutlined(parsed, 0, "NW", f, framelimit), "indexed/" + u + "_Firing" + "_face2" + "_" + f + ".png");
+                        CreateChannelBitmap(processSingleOutlined(parsed, 0, "NE", f, framelimit), "indexed/" + u + "_Firing" + "_face3" + "_" + f + ".png");
+
+                    }
+
+                
+                bin.Close();
             }
         }
-        */
+        /*        private static void processBases()
+                {
+                    BinaryReader[] powers = new BinaryReader[8];
+                    BinaryReader[] speeds = new BinaryReader[8];
+                    BinaryReader[] techniques = new BinaryReader[8];
+
+
+                    MagicaVoxelData[][] basepowers = new MagicaVoxelData[8][];
+                    MagicaVoxelData[][] basespeeds = new MagicaVoxelData[8][];
+                    MagicaVoxelData[][] basetechniques = new MagicaVoxelData[8][];
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        powers[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_P_" + i + ".vox"));
+                        basepowers[i] = FromMagica(powers[i]);
+                        speeds[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_S_" + i + ".vox"));
+                        basespeeds[i] = FromMagica(speeds[i]);
+                        techniques[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_T_" + i + ".vox"));
+                        basetechniques[i] = FromMagica(techniques[i]);
+
+                    }
+
+                    System.IO.Directory.CreateDirectory("Power");
+                    System.IO.Directory.CreateDirectory("Speed");
+                    System.IO.Directory.CreateDirectory("Technique");
+                    Graphics g;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+
+
+                            Bitmap power = drawPixelsSE(basepowers[j], i, 0), oPower = drawOutlineSE(basepowers[j], i, 0);
+                            g = Graphics.FromImage(oPower);
+                            g.DrawImage(power, 2, 2);
+                            oPower.Save("Power/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
+
+                            Bitmap speed = drawPixelsSE(basespeeds[j], i, 0), oSpeed = drawOutlineSE(basespeeds[j], i, 0);
+                            g = Graphics.FromImage(oSpeed);
+                            g.DrawImage(speed, 2, 2);
+                            oSpeed.Save("Speed/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
+
+                            Bitmap technique = drawPixelsSE(basetechniques[j], i, 0), oTechnique = drawOutlineSE(basetechniques[j], i, 0);
+                            g = Graphics.FromImage(oTechnique);
+                            g.DrawImage(technique, 2, 2);
+                            oTechnique.Save("Technique/color" + i + "_frame_" + j + ".png", ImageFormat.Png);
+                        }
+                    }
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        powers[i].Close();
+                        speeds[i].Close();
+                        techniques[i].Close();
+                    }
+                }
+                private static void processUnit(string u)
+                {
+                    BinaryReader bin = new BinaryReader(File.Open(u + "_X.vox", FileMode.Open));
+                    MagicaVoxelData[] parsed = FromMagica(bin);
+
+                    BinaryReader[] bases = {
+                                           new BinaryReader(File.Open("Base_Power.vox", FileMode.Open)),
+                                           new BinaryReader(File.Open("Base_Speed.vox", FileMode.Open)),
+                                           new BinaryReader(File.Open("Base_Technique.vox", FileMode.Open))
+                    };
+                    BinaryReader[] powers = new BinaryReader[8];
+                    BinaryReader[] speeds = new BinaryReader[8];
+                    BinaryReader[] techniques = new BinaryReader[8];
+
+
+                    MagicaVoxelData[][] basepowers = new MagicaVoxelData[8][];
+                    MagicaVoxelData[][] basespeeds = new MagicaVoxelData[8][];
+                    MagicaVoxelData[][] basetechniques = new MagicaVoxelData[8][];
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        powers[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_P_" + i + ".vox"));
+                        basepowers[i] = FromMagica(powers[i]);
+                        speeds[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_S_" + i + ".vox"));
+                        basespeeds[i] = FromMagica(speeds[i]);
+                        techniques[i] = new BinaryReader(File.OpenRead(@"Bases\Anim_T_" + i + ".vox"));
+                        basetechniques[i] = FromMagica(techniques[i]);
+
+                    }
+                    for (int i = 0; i < 8; i++)
+                    {
+                        System.IO.Directory.CreateDirectory(u);
+                        System.IO.Directory.CreateDirectory(u + "color" + i);
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/power");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/power/SE");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/power/SW");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/power/NW");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/power/NE");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/speed");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/SE");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/SW");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/NW");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/speed/NE");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/technique");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/SE");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/SW");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/NW");
+                        System.IO.Directory.CreateDirectory(u + "color" + i + "/technique/NE");
+                        Bitmap bSE = drawPixelsSE(parsed, i, 0);
+                        bSE.Save(u + "/color" + i + "_" + u + "_default_SE" + ".png", ImageFormat.Png);
+                        Bitmap bSW = drawPixelsSW(parsed, i, 0);
+                        bSW.Save(u + "/color" + i + "_" + u + "_default_SW" + ".png", ImageFormat.Png);
+                        Bitmap bNW = drawPixelsNW(parsed, i, 0);
+                        bNW.Save(u + "/color" + i + "_" + u + "_default_NW" + ".png", ImageFormat.Png);
+                        Bitmap bNE = drawPixelsNE(parsed, i, 0);
+                        bNE.Save(u + "/color" + i + "_" + u + "_default_NE" + ".png", ImageFormat.Png);
+                        for (int j = 0; j < 8; j++)
+                        {
+                            Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
+                            Graphics g = Graphics.FromImage(power);
+                            g.DrawImage(bSE, 0, 0);
+                            power.Save(u + "color" + i + "/power/SE/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
+                            g = Graphics.FromImage(speed);
+                            g.DrawImage(bSE, 0, 0);
+                            speed.Save(u + "color" + i + "/speed/SE/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
+                            g = Graphics.FromImage(technique);
+                            g.DrawImage(bSE, 0, 0);
+                            technique.Save(u + "color" + i + "/technique/SE/" + j + ".png", ImageFormat.Png);
+                        }
+                        for (int j = 0; j < 8; j++)
+                        {
+                            Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
+                            Graphics g = Graphics.FromImage(power);
+                            g.DrawImage(bSW, 0, 0);
+                            power.Save(u + "color" + i + "/power/SW/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
+                            g = Graphics.FromImage(speed);
+                            g.DrawImage(bSW, 0, 0);
+                            speed.Save(u + "color" + i + "/speed/SW/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
+                            g = Graphics.FromImage(technique);
+                            g.DrawImage(bSW, 0, 0);
+                            technique.Save(u + "color" + i + "/technique/SW/" + j + ".png", ImageFormat.Png);
+                        }
+                        for (int j = 0; j < 8; j++)
+                        {
+                            Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
+                            Graphics g = Graphics.FromImage(power);
+                            g.DrawImage(bNE, 0, 0);
+                            power.Save(u + "color" + i + "/power/NE/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
+                            g = Graphics.FromImage(speed);
+                            g.DrawImage(bNE, 0, 0);
+                            speed.Save(u + "color" + i + "/speed/NE/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
+                            g = Graphics.FromImage(technique);
+                            g.DrawImage(bNE, 0, 0);
+                            technique.Save(u + "color" + i + "/technique/NE/" + j + ".png", ImageFormat.Png);
+                        }
+                        for (int j = 0; j < 8; j++)
+                        {
+                            Bitmap power = drawPixelsSE(basepowers[j], i, j % 2);
+                            Graphics g = Graphics.FromImage(power);
+                            g.DrawImage(bNW, 0, 0);
+                            power.Save(u + "color" + i + "/power/NW/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap speed = drawPixelsSE(basespeeds[j], i, j % 2);
+                            g = Graphics.FromImage(speed);
+                            g.DrawImage(bNW, 0, 0);
+                            speed.Save(u + "color" + i + "/speed/NW/" + j + ".png", ImageFormat.Png);
+
+                            Bitmap technique = drawPixelsSE(basetechniques[j], i, j % 2);
+                            g = Graphics.FromImage(technique);
+                            g.DrawImage(bNW, 0, 0);
+                            technique.Save(u + "color" + i + "/technique/NW/" + j + ".png", ImageFormat.Png);
+                        }
+                        ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
+                        startInfo.UseShellExecute = false;
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/SE/* " + u + "/color" + i + "_" + u + "_power_SE.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/SE/* " + u + "/color" + i + "_" + u + "_speed_SE.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/SE/* " + u + "/color" + i + "_" + u + "_technique_SE.gif";
+                        Process.Start(startInfo).WaitForExit();
+
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/SW/* " + u + "/color" + i + "_" + u + "_power_SW.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/SW/* " + u + "/color" + i + "_" + u + "_speed_SW.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/SW/* " + u + "/color" + i + "_" + u + "_technique_SW.gif";
+                        Process.Start(startInfo).WaitForExit();
+
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/NW/* " + u + "/color" + i + "_" + u + "_power_NW.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/NW/* " + u + "/color" + i + "_" + u + "_speed_NW.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/NW/* " + u + "/color" + i + "_" + u + "_technique_NW.gif";
+                        Process.Start(startInfo).WaitForExit();
+
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/power/NE/* " + u + "/color" + i + "_" + u + "_power_NE.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/speed/NE/* " + u + "/color" + i + "_" + u + "_speed_NE.gif";
+                        Process.Start(startInfo).WaitForExit();
+                        startInfo.Arguments = "-dispose background -delay 20 -loop 0 " + u + "color" + i + "/technique/NE/* " + u + "/color" + i + "_" + u + "_technique_NE.gif";
+                        Process.Start(startInfo).WaitForExit();
+
+                    }
+                    bin.Close();
+                    bases[0].Close();
+                    bases[1].Close();
+                    bases[2].Close();
+                    for (int i = 0; i < 8; i++)
+                    {
+                        powers[i].Close();
+                        speeds[i].Close();
+                        techniques[i].Close();
+                    }
+                }
+                */
         private static Bitmap[] processFloor(string u)
         {
             BinaryReader bin = new BinaryReader(File.Open(u + "_P.vox", FileMode.Open));
@@ -2499,7 +2900,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             int[] heights = new int[]
             {
-                2,4,1,5,7,10,5,3,2,1,
+                2, 3, 1, 4, 6, 8, 4, 2, 2, 1, 7
             };
 
             int[,] grid = new int[width, height];
@@ -2654,9 +3055,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     }
                 }
             }
-            int[] allcolors = { 1,2,3,4,5,6,7 }, colors = new int[4];
-            bool[] taken = { false, false, false, false, false, false, false};
-            for (int i = 1; i < 4; i++ )
+            int[] allcolors = { 1, 2, 3, 4, 5, 6, 7 }, colors = new int[4];
+            bool[] taken = { false, false, false, false, false, false, false };
+            for (int i = 1; i < 4; i++)
             {
                 int col = r.Next(7);
                 while (taken[col])
@@ -2751,11 +3152,11 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     int rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
                     int rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
                     int problems = 0;
-                    while(placing[rgx,rgy] != null)
+                    while (placing[rgx, rgy] != null)
                     {
                         rgx = r.Next(2 + (width / 2) * (section % 2), (width / 2) - 2 + (width / 2) * (section % 2));
                         rgy = r.Next((section / 2 == 0) ? 3 : height / 2 + 2, ((section / 2 == 0) ? height / 2 - 2 : height - 3));
-                        if(placing[rgx,rgy] != null)
+                        if (placing[rgx, rgy] != null)
                             problems++;
                         if (problems > 10)
                         {
@@ -3007,7 +3408,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             proc.StartInfo = new ProcessStartInfo(@"ffmpeg.exe");
             proc.StartInfo.UseShellExecute = false;
             proc.StartInfo.Arguments = " -r 8 -i animation\\%03d.png -vcodec libvpx -pass 1 -an -f rawvideo -r 6 -y NUL";
-// @" -i animation\%03d.png -vcodec rawvideo -pix_fmt yuv420p animation\preview.y4m";
+            // @" -i animation\%03d.png -vcodec rawvideo -pix_fmt yuv420p animation\preview.y4m";
             proc.Start();
             proc.WaitForExit();
             /* -i 1080/sintel_trailer_2k_%04d.png -vf crop=1920:816:0:132 -vcodec rawvideo -r 24 -pix_fmt yuv444p sintel_trailer.y4m
@@ -3016,14 +3417,14 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             proc.StartInfo.Arguments = "-a -m 0:" + (3 - 1) + @" animation\###.png animation\preview.yuv";
            ffmpeg -i INPUTFILE -b 1500k -vcodec libx264 -vpre slow -vpre baseline -g 30 "OUTPUTFILE.mp4"
              * */
-            
+
             Process p2 = new Process();
             p2.StartInfo = new ProcessStartInfo(@"ffmpeg.exe");//vpxenc.exe
             p2.StartInfo.UseShellExecute = false;
             p2.StartInfo.Arguments = " -r 8 -i animation\\%03d.png -b:v 2500K -vcodec libvpx -pass 2 -acodec libvorbis -crf 4 -f webm -g 30 -r 6 animation\\preview.webm";
-/*            @" --best --cpu-used=1 --auto-alt-ref=1 --lag-in-frames=16 --fps=8000/1001" +
-@" --end-usage=vbr --undershoot-pct=95 --buf-sz=6000 --buf-initial-sz=4000 --buf-optimal-sz=5000" +
-@" --passes=2 --threads=2 --target-bitrate=1000 -o animation\preview.webm animation\preview.y4m";*/
+            /*            @" --best --cpu-used=1 --auto-alt-ref=1 --lag-in-frames=16 --fps=8000/1001" +
+            @" --end-usage=vbr --undershoot-pct=95 --buf-sz=6000 --buf-initial-sz=4000 --buf-optimal-sz=5000" +
+            @" --passes=2 --threads=2 --target-bitrate=1000 -o animation\preview.webm animation\preview.y4m";*/
             p2.Start();
             p2.WaitForExit();
 
@@ -3041,7 +3442,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             proc.Start();
             proc.WaitForExit();
 
-//            Console.In.ReadLine();
+            //            Console.In.ReadLine();
             //@" -i animation\%03d.png -vcodec rawvideo -pix_fmt yuv420p animation\preview.y4m";
 
             /* ffmpeg -r 1 -pattern_type glob -i '*.jpg'
@@ -3059,13 +3460,81 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         {
             Initialize();
 
-            for (int i = 0; i < 11; i++)
+            System.IO.Directory.CreateDirectory("Palettes");
+            /*for (int c = 0; c < 8; c++)
+            {
+                List<string> ls = new List<string>(17);
+                for (int i = 0; i < 17; i++)
+                {
+                    ls.Add(colors[i * 8 + c][0] + ", " + colors[i * 8 + c][1] + ", " + colors[i * 8 + c][2] + "\n");
+                }
+                File.WriteAllLines("Palettes/color" + c + ".txt", ls);
+            }*/
+
+
+            //InitializePalettes();
+
+            for (int c = 0; c < 8; c++)
+            {
+                renderOnlyColors(c).Save("PaletteColor" + c + ".png", ImageFormat.Png);
+            }
+            renderOnlyColors().Save("PaletteTerrain" + ".png", ImageFormat.Png);
+            Madden();
+            renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
+
+           // CreateIndexedBitmap(new Bitmap("crazy/Infantry_face0_0.png"), "redefined_Infantry_color1.png", 1);
+
+
+            /*for (int i = 0; i < 11; i++)
             {
                 PlusPaletteDraw.drawPixelsFlat(i);
-            }
+            }*/
 
             //processUnitOutlined("Block");
+/*
+            Madden();
+
+            processUnitChannel("Infantry");
+            processUnitChannel("Infantry_P");
+            processUnitChannel("Infantry_S");
+            processUnitChannel("Infantry_T");
+
+            processUnitChannel("Artillery");
+            processUnitChannel("Artillery_P");
+            processUnitChannel("Artillery_S");
+            processUnitChannel("Artillery_T");
+
+            processUnitChannel("Tank");
+            processUnitChannel("Tank_P");
+            processUnitChannel("Tank_S");
+            processUnitChannel("Tank_T");
+
+            processUnitChannel("Supply");
+            processUnitChannel("Supply_P");
+            processUnitChannel("Supply_S");
+            processUnitChannel("Supply_T");
+
+            processUnitChannel("Plane");
+            processUnitChannel("Plane_P");
+            processUnitChannel("Plane_S");
+            processUnitChannel("Plane_T");
+
+            processUnitChannel("Copter");
+            processUnitChannel("Copter_P");
+            processUnitChannel("Copter_S");
+            processUnitChannel("Copter_T");
+
+            processUnitChannel("City");
+            processUnitChannel("Factory");
+            processUnitChannel("Airport");
+            processUnitChannel("Laboratory");
+            processUnitChannel("Castle");
+            processUnitChannel("Estate");
+            */
+
+
             /*
+             
             processUnitOutlined("Infantry");
             processUnitOutlined("Infantry_P");
             processUnitOutlined("Infantry_S");
@@ -3102,9 +3571,10 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Laboratory");
             processUnitOutlined("Castle");
             processUnitOutlined("Estate");
-            */
+            
+             */
 
-     //       makeGamePreview(9, 18);
+            //       makeGamePreview(9, 18);
 
 
             /*
@@ -3125,7 +3595,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processFloor("River_Cross");
             */
             //processBases();
-            
+
             //            makeFlatTiling().Save("tiling_flat.png", ImageFormat.Png);
             /*for (int i = 0; i < 40; i++)
             {

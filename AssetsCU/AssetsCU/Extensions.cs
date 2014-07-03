@@ -13,16 +13,30 @@ namespace AssetsCU
             if (list.Count() == 0)
                 return default(T);
             int idx = 0, tgt = r.Next(list.Count());
-            foreach(T t in list)
+            foreach (T t in list)
             {
-                if(tgt == idx)
+                if (tgt == idx)
                 {
                     return t;
                 }
                 idx++;
             }
             return default(T);
-
+        }
+        public static int FindByIndex<T>(this IList<T> list, T target)
+        {
+            if (list.Count() == 0)
+                return -1;
+            int idx = 0;
+            foreach (T t in list)
+            {
+                if (target.Equals(list[idx]))
+                {
+                    return idx;
+                }
+                idx++;
+            }
+            return -1;
         }
         public static T RandomElement<T>(this T[,] mat)
         {

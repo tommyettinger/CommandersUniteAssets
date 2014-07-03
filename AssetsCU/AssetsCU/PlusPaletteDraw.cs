@@ -14,7 +14,8 @@ namespace AssetsCU
     {
         public static Random r = new Random();
         private static float[][] colors = null;
-        private static float[][] flatcolors = new float[][]
+        
+        public static float[][] flatcolors = new float[][]
         {
             //plains
             new float[] {0.63F,0.92F,0.3F,2F},
@@ -494,22 +495,20 @@ Ruins	purple-gray
 
             //g.DrawImage(image, 10, 10, width, height);
             float merged = (flatcolors[color][0] + flatcolors[color][1] + flatcolors[color][2]) * 0.45F;
-            float[][] colorMatrixElements = { 
+
+
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][]{ 
    new float[] {(merged + flatcolors[color][0]) * 0.5F,  0,  0,  0, 0},
    new float[] {0,  (merged + flatcolors[color][1]) * 0.5F,  0,  0, 0},
    new float[] {0,  0,  (merged + flatcolors[color][2]) * 0.5F,  0, 0},
    new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}};
-
-            float[][] colorMatrixElementsDark = { 
+   new float[] {0, 0, 0, 0, 1F}});
+            ColorMatrix colorMatrixDark = new ColorMatrix(new float[][]{ 
    new float[] {merged*0.3F + flatcolors[color][0] * 0.5F,  0,  0,  0, 0},
    new float[] {0,  merged*0.3F + flatcolors[color][1] * 0.52F,  0,  0, 0},
    new float[] {0,  0,  merged*0.3F + flatcolors[color][2] * 0.58F,  0, 0},
    new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}};
-
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-            ColorMatrix colorMatrixDark = new ColorMatrix(colorMatrixElementsDark);
+   new float[] {0, 0, 0, 0, 1F}});
             ColorMatrix colorMatrixBright = new ColorMatrix(new float[][]{ 
    new float[] {merged*0.55F + flatcolors[color][0] * 0.85F,  0,  0,  0, 0},
    new float[] {0,  merged*0.55F + flatcolors[color][1] * 0.85F,  0,  0, 0},
@@ -727,7 +726,7 @@ Ruins	purple-gray
                        GraphicsUnit.Pixel,
                        imageAttributes);
 
-                spectrum[faction].Save("Terrain/" + terrainnames[color] + "_color" + faction + ".png");
+     //           spectrum[faction].Save("Terrain/" + terrainnames[color] + "_color" + faction + ".png");
             }
 
 
@@ -766,7 +765,7 @@ Ruins	purple-gray
                        GraphicsUnit.Pixel,
                        imageAttributes);
 
-                spectrum[faction].Save("Terrain/" + terrainnames[color] + "_bold_color" + faction + ".png");
+//                spectrum[faction].Save("Terrain/" + terrainnames[color] + "_bold_color" + faction + ".png");
             }
             //AlterChannels(1, 1, 1);
             //        public static ShaderProgram Bright = AlterChannels(1.35f, 1.35f, 1.35f);
