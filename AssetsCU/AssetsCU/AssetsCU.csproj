@@ -502,6 +502,9 @@
     <Content Include="PaletteCrazy.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="PaletteTerrain.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="spin_soft.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

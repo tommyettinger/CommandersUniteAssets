@@ -19,7 +19,7 @@ namespace AssetsCU
     {
         public static string[] Terrains = new string[]
         {"Plains","Forest","Desert","Jungle","Hills"
-        ,"Mountains","Ruins","Tundra","Road","River"};
+        ,"Mountains","Ruins","Tundra","Road","River", "Basement"};
         public static string[] Directions = { "SE", "SW", "NW", "NE" };
         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
         public static string[] CurrentUnits = {
@@ -509,31 +509,36 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
 
         private static bool PalettesInitialized = false;
-        private static List<Color>[] SDPalettes = new List<Color>[9];
+        private static List<Color>[] SDPalettes = new List<Color>[18];
         public static void InitializePalettes()
         {
             Bitmap b;
-            b = new Bitmap(256, 8, PixelFormat.Format32bppArgb);
-            for (int c = 0; c < 9; c++)
+            b = new Bitmap(256, 32, PixelFormat.Format32bppArgb);
+            for (int c = 0; c < 18; c++)
             {
                 Bitmap bmp;
                 if (c == 8)
+                {
                     bmp = new Bitmap("PaletteCrazy.png");
+                }
+                else if (c == 9)
+                {
+                    bmp = new Bitmap("PaletteTerrain.png");
+                }
+                else if (c > 9)
+                {
+                    bmp = new Bitmap("PaletteTerrainColor" + (c-10) + ".png");
+                }
                 else
+                {
                     bmp = new Bitmap("PaletteColor" + c + ".png");
+                }
                 SDPalettes[c] = new List<Color>();
                 for (int i = 0; i < bmp.Width; i+=(i%3)+1)
                 {
                     SDPalettes[c].Add(bmp.GetPixel(i, 0));
                     SDPalettes[c].Add(bmp.GetPixel(i, 3));
                     
-                }
-                if(c == 8)
-                {
-                    b.Save("Palettes/octa.png", ImageFormat.Png);
-                    b.Dispose();
-                    bmp.Dispose();
-                    break;
                 }
                 for (int cl = 0; cl < SDPalettes[c].Count; cl++)
                 {
@@ -543,11 +548,17 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     b.SetPixel(cl, c, Color.Black);
                 }
+
                 Console.WriteLine("Color "+ c + " has: " + SDPalettes[c].Count + " entries.");
+
                 //SDPalettes[c] = colors;
                 
                 bmp.Dispose();
             }
+            b.Save("Palettes/Palette.png", ImageFormat.Png);
+
+            b.Dispose();
+
             GC.Collect();
             PalettesInitialized = true;
 
@@ -616,11 +627,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     int cb = (SDPalettes[8].FindByIndex(bmp.GetPixel(x, y)));
                     if (cb != -1)
-                        b.SetPixel(x, y, Color.FromArgb(cb, 0, 0));
+                    {
+                        if(cb == 0)
+                            b.SetPixel(x, y, Color.FromArgb(0, cb, 0, 0));
+                        else
+                            b.SetPixel(x, y, Color.FromArgb(cb, 0, 0));
+                    }
                     else
                         Console.WriteLine("Color not found at: " + x + ", " + y);
 
-                        //array[bmp.Width * y + x] = (byte)cb;
+                    //array[bmp.Width * y + x] = (byte)cb;
                 }
             b.Save(savename, ImageFormat.Png);
             //BitmapSource bitmap = BitmapSource.Create(bmp.Width, bmp.Height, 96, 96, Media.PixelFormats.Indexed8, Palettes[palette], array, bmp.Width);
@@ -632,6 +648,32 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 encoder.Frames.Add(BitmapFrame.Create(bitmap));
                 encoder.Save(stream);
             }*/
+        }
+        public static void CreateChannelBitmap(Bitmap bmp, string savename, int altPalette)
+        {
+            if (PalettesInitialized == false)
+                return;
+            Bitmap b = new Bitmap(bmp);
+            //byte[] array = new byte[bmp.Width * bmp.Height];
+
+            for (int x = 0; x < bmp.Width; x++)
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    int cb = (SDPalettes[altPalette].FindByIndex(bmp.GetPixel(x, y)));
+                    if (cb != -1)
+                    {
+                        if (cb == 0)
+                            b.SetPixel(x, y, Color.FromArgb(0, cb, 0, 0));
+                        else
+                            b.SetPixel(x, y, Color.FromArgb(cb, 0, 0));
+                    }
+                    else
+                        Console.WriteLine("Color not found at: " + x + ", " + y);
+
+                    //array[bmp.Width * y + x] = (byte)cb;
+                }
+            b.Save(savename, ImageFormat.Png);
+            
         }
 
         private static Bitmap render(MagicaVoxelData[] voxels, int facing, int faction, int frame, int maxFrames)
@@ -839,7 +881,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             return b;
         }
-        private static Bitmap renderOnlyColors()
+        private static Bitmap renderOnlyTerrainColors()
         {
             Bitmap b = new Bitmap(128, 4, PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage((Image)b);
@@ -918,6 +960,36 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                    GraphicsUnit.Pixel,
                    imageAttributes);
             }
+            return b;
+        }
+        private static Bitmap renderOnlyTerrainColors(int faction)
+        {
+            Bitmap b = new Bitmap(128, 4, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage((Image)b);
+            Bitmap image = new Bitmap("PaletteTerrain.png");
+            //            Image gray = new Bitmap("cube_gray_soft.png");
+            //Image reversed = new Bitmap("cube_reversed.png");
+            ImageAttributes imageAttributes = new ImageAttributes();
+            int width = image.Width;
+            int height = image.Height;
+
+            imageAttributes.SetColorMatrix(
+            new ColorMatrix(new float[][]{ 
+               new float[] {0.5F,  0,  0,  0, 0},
+               new float[] {0,  0.5F,  0,  0, 0},
+               new float[] {0,  0,  0.5F,  0, 0},
+               new float[] {0,  0,     0,  1F, 0},
+               new float[] {0.55F*(0.22F+colors[32 + faction][0]), 0.55F*(0.251F+colors[32 + faction][1]), 0.55F*(0.31F+colors[32 + faction][2]), 0, 1F}}),
+                           ColorMatrixFlag.Default,
+                           ColorAdjustType.Bitmap);
+            g.DrawImage(image,
+                   new Rectangle(0, 0, width, height),  // destination rectangle 
+                //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
             return b;
         }
         private static Bitmap renderOnlyColors(int faction)
@@ -1691,8 +1763,24 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 bin.Close();
             }
         }
+        public static void processTerrainChannel()
+        {
+            for (int i = 0; i < 11; i++)
+            {
+                PlusPaletteDraw.drawPixelsFlat(i);
 
-        private static void processUnitChannel(string u)
+                Bitmap b = new Bitmap("Terrain/" + Terrains[i] + ".png");
+                Bitmap bold = new Bitmap("Terrain/" + Terrains[i] + "_bold.png");
+                CreateChannelBitmap(b, "indexed/" + Terrains[i] + ".png", 9);
+                CreateChannelBitmap(bold, "indexed/" + Terrains[i] + "_bold.png", 9);
+                /*for(int c = 0; c < 8; c++)
+                {
+                    CreateChannelBitmap(b, "indexed/" + Terrains[i] +"_color"+ c + ".png", 9);
+                    CreateChannelBitmap(bold, "indexed/" + Terrains[i] + "_bold_color" + c + ".png", 9);
+                }*/
+            }
+        }
+        public static void processUnitChannel(string u)
         {
 
             Console.WriteLine("Processing: " + u);
@@ -3461,6 +3549,10 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             Initialize();
 
             System.IO.Directory.CreateDirectory("Palettes");
+            System.IO.Directory.CreateDirectory("indexed");
+
+            InitializePalettes();
+
             /*for (int c = 0; c < 8; c++)
             {
                 List<string> ls = new List<string>(17);
@@ -3471,27 +3563,20 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 File.WriteAllLines("Palettes/color" + c + ".txt", ls);
             }*/
 
-
-            //InitializePalettes();
-
+            /*
             for (int c = 0; c < 8; c++)
             {
-                renderOnlyColors(c).Save("PaletteColor" + c + ".png", ImageFormat.Png);
-            }
-            renderOnlyColors().Save("PaletteTerrain" + ".png", ImageFormat.Png);
-            Madden();
-            renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
+                renderOnlyTerrainColors(c).Save("PaletteTerrainColor" +c+ ".png", ImageFormat.Png);
+            }*/
+           // Madden();
+           // renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
 
            // CreateIndexedBitmap(new Bitmap("crazy/Infantry_face0_0.png"), "redefined_Infantry_color1.png", 1);
 
-
-            /*for (int i = 0; i < 11; i++)
-            {
-                PlusPaletteDraw.drawPixelsFlat(i);
-            }*/
+            processTerrainChannel();
 
             //processUnitOutlined("Block");
-/*
+            /*
             Madden();
 
             processUnitChannel("Infantry");
@@ -3530,11 +3615,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitChannel("Laboratory");
             processUnitChannel("Castle");
             processUnitChannel("Estate");
+            
+
+
             */
 
+            processUnitOutlined("Copter");
+            processUnitOutlined("Copter_P");
+            processUnitOutlined("Copter_S");
+            processUnitOutlined("Copter_T");
 
-            /*
-             
             processUnitOutlined("Infantry");
             processUnitOutlined("Infantry_P");
             processUnitOutlined("Infantry_S");
@@ -3560,10 +3650,6 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Plane_S");
             processUnitOutlined("Plane_T");
             
-            processUnitOutlined("Copter");
-            processUnitOutlined("Copter_P");
-            processUnitOutlined("Copter_S");
-            processUnitOutlined("Copter_T");
             
             processUnitOutlined("City");
             processUnitOutlined("Factory");
@@ -3572,7 +3658,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Castle");
             processUnitOutlined("Estate");
             
-             */
+             
 
             //       makeGamePreview(9, 18);
 
