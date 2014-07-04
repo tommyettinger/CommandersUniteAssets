@@ -371,14 +371,14 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             new float[] {0.4F,0.6F,0.9F,flat_alpha},
             
             //136 smoke (FLAT ALPHA)
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
-            new float[] {0.1F,0.1F,0.1F,flat_alpha},
+            new float[] {0.12F,0.08F,-0.01F,flat_alpha},
+            new float[] {0.23F,-0.08F,0.18F,flat_alpha},
+            new float[] {0.14F,0.14F,0.02F,flat_alpha},
+            new float[] {0.14F,0.14F,0.02F,flat_alpha},
+            new float[] {0.14F,0.14F,0.02F,flat_alpha},
+            new float[] {0.14F,0.14F,0.02F,flat_alpha},
+            new float[] {0.14F,0.14F,0.02F,flat_alpha},
+            new float[] {0.14F,0.14F,0.02F,flat_alpha},
 
             //144 guts
             new float[] {0.67F,0.05F,-0.1F,1F},  //black
@@ -742,10 +742,14 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             
         }
 
-        private static Bitmap render(MagicaVoxelData[] voxels, int facing, int faction, int frame, int maxFrames)
+        private static Bitmap[] render(MagicaVoxelData[] voxels, int facing, int faction, int frame, int maxFrames)
         {
-            Bitmap b = new Bitmap(80, 100, PixelFormat.Format32bppArgb);
-            Graphics g = Graphics.FromImage((Image)b);
+            Bitmap[] b = {
+            new Bitmap(88, 108, PixelFormat.Format32bppArgb),
+            new Bitmap(88, 108, PixelFormat.Format32bppArgb),};
+
+            Graphics g = Graphics.FromImage((Image)b[0]);
+            Graphics gsh = Graphics.FromImage((Image)b[1]);
             //Image image = new Bitmap("cube_large.png");
             Image image = new Bitmap("cube_soft.png");
             Image flat = new Bitmap("flat_soft.png");
@@ -818,42 +822,70 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     continue;
                 else if ((frame % 2 != 1) && colors[current_color + faction][3] == spin_alpha_1)
                     continue;
+                else if (current_color == 96)
+                {
 
-                if (current_color == 80) //lights
-                {
-                    float lightCalc = (0.5F - ((frame % 3) + (frame / 3))) * 0.12F;
-                    colorMatrix = new ColorMatrix(new float[][]{ 
-   new float[] {0.22F+colors[current_color + faction][0] + lightCalc,  0,  0,  0, 0},
-   new float[] {0,  0.251F+colors[current_color + faction][1] + lightCalc,  0,  0, 0},
-   new float[] {0,  0,  0.31F+colors[current_color + faction][2] + lightCalc,  0, 0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}});
-                }
-                else
-                {
                     colorMatrix = new ColorMatrix(new float[][]{ 
    new float[] {0.22F+colors[current_color + faction][0],  0,  0,  0, 0},
    new float[] {0,  0.251F+colors[current_color + faction][1],  0,  0, 0},
    new float[] {0,  0,  0.31F+colors[current_color + faction][2],  0, 0},
    new float[] {0,  0,  0,  1F, 0},
    new float[] {0, 0, 0, 0, 1F}});
+
+                    imageAttributes.SetColorMatrix(
+                       colorMatrix,
+                       ColorMatrixFlag.Default,
+                       ColorAdjustType.Bitmap);
+                    gsh.DrawImage(flat,
+                       new Rectangle((vx.x + vx.y) * 2+4, 100 - 20 - vx.y + vx.x - vx.z * 3 + 2
+                           , width, height),  // destination rectangle 
+                        //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                       0, 0,        // upper-left corner of source rectangle 
+                       width,       // width of source rectangle
+                       height,      // height of source rectangle
+                       GraphicsUnit.Pixel,
+                       imageAttributes);
                 }
-                imageAttributes.SetColorMatrix(
-                   colorMatrix,
-                   ColorMatrixFlag.Default,
-                   ColorAdjustType.Bitmap);
-                g.DrawImage((current_color == 80) ? spin :
-                   (colors[current_color + faction][3] == 1F) ? image : (colors[current_color + faction][3] == flat_alpha) ? flat : spin,
-                   new Rectangle((vx.x + vx.y) * 2, 100 - 24 - vx.y + vx.x - vx.z * 3 - ((colors[current_color + faction][3] == flat_alpha) ? -2 : jitter)
-                       , width, height),  // destination rectangle 
-                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
-                   0, 0,        // upper-left corner of source rectangle 
-                   width,       // width of source rectangle
-                   height,      // height of source rectangle
-                   GraphicsUnit.Pixel,
-                   imageAttributes);
+                else
+                {
+                    if (current_color == 80) //lights
+                    {
+                        float lightCalc = (0.5F - ((frame % 3) + (frame / 3))) * 0.12F;
+                        colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {0.22F+colors[current_color + faction][0] + lightCalc,  0,  0,  0, 0},
+   new float[] {0,  0.251F+colors[current_color + faction][1] + lightCalc,  0,  0, 0},
+   new float[] {0,  0,  0.31F+colors[current_color + faction][2] + lightCalc,  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                    }
+                    else
+                    {
+                        colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {0.22F+colors[current_color + faction][0],  0,  0,  0, 0},
+   new float[] {0,  0.251F+colors[current_color + faction][1],  0,  0, 0},
+   new float[] {0,  0,  0.31F+colors[current_color + faction][2],  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+                    }
+                    imageAttributes.SetColorMatrix(
+                       colorMatrix,
+                       ColorMatrixFlag.Default,
+                       ColorAdjustType.Bitmap);
+                    g.DrawImage((current_color == 80) ? spin :
+                       (colors[current_color + faction][3] == 1F) ? image : (colors[current_color + faction][3] == flat_alpha) ? flat : spin,
+                       new Rectangle((vx.x + vx.y) * 2 + 4 + ((current_color == 136) ? jitter - 1 : 0),
+                           100 - 20 - vx.y + vx.x - vx.z * 3 - ((colors[current_color + faction][3] == flat_alpha) ? -2 : jitter),
+                           width, height),  // destination rectangle 
+                        //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                       0, 0,        // upper-left corner of source rectangle 
+                       width,       // width of source rectangle
+                       height,      // height of source rectangle
+                       GraphicsUnit.Pixel,
+                       imageAttributes);
+                }
             }
             return b;
+;
         }
 
         private static Bitmap renderOutline(MagicaVoxelData[] voxels, int facing, int faction, int frame, int maxFrames)
@@ -861,6 +893,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             Bitmap b = new Bitmap(88, 108, PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage((Image)b);
             Image image = new Bitmap("black_outline_soft.png");
+//            Image flat = new Bitmap("flat_soft.png");
             ImageAttributes imageAttributes = new ImageAttributes();
             int width = 8;
             int height = 8;
@@ -921,7 +954,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             int jitter = (frame % 3) + (frame / 3);
             if (maxFrames != 4)
                 jitter = 0;
-            foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128 - ((v.color == 249 - 96) ? 32 * 128 * 32 : 0))) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
+            foreach (MagicaVoxelData vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128 // - ((v.color == 249 - 96) ? 32 * 128 * 32 : 0)
             {
                 int current_color = 249 - vx.color;
 
@@ -929,14 +962,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     continue;
                 else if ((frame % 2 != 1) && colors[current_color + faction][3] == spin_alpha_1)
                     continue;
-                if (colors[current_color + faction][3] != flat_alpha)
+                if ((colors[current_color + faction][3] != flat_alpha))
                 {
                     imageAttributes.SetColorMatrix(
                        colorMatrix,
                        ColorMatrixFlag.Default,
                        ColorAdjustType.Bitmap);
-                    g.DrawImage(image,
-                       new Rectangle((vx.x + vx.y) * 2 + 2, 100 - 20 - 2 - vx.y + vx.x - vx.z * 3 - jitter, width, height),  // destination rectangle 
+                    g.DrawImage(image, //((colors[current_color + faction][3] == flat_alpha) ? flat : image)
+                    new Rectangle((vx.x + vx.y) * 2 + 2, //if flat use + 4
+                        100 - 20 - 2 - vx.y + vx.x - vx.z * 3 - jitter, //((colors[current_color + faction][3] == flat_alpha) ? -4 : jitter
+                        width, height),  // destination rectangle 
                         //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                        0, 0,        // upper-left corner of source rectangle 
                        width,       // width of source rectangle
@@ -1711,7 +1746,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 System.IO.Directory.CreateDirectory(u);
                 for (int face = 0; face < 4; face++)
                 {
-                    Bitmap b = render(parsed, face, i, 0, 4);
+                    Bitmap b = render(parsed, face, i, 0, 4)[0];
                     b.Save(u + "/color" + i + "_face" + face + "_" + Directions[face] + "_frame" + 0 + "_.png", ImageFormat.Png);
                 }
             }
@@ -1721,7 +1756,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         private static Bitmap processSingleOutlined(MagicaVoxelData[] parsed, int color, string dir, int frame, int maxFrames)
         {
             Graphics g;
-            Bitmap b, o;
+            Bitmap[] b;
+            Bitmap o, n = new Bitmap(88,108,PixelFormat.Format32bppArgb);
             int d = 0;
             switch (dir)
             {
@@ -1739,9 +1775,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
             b = render(parsed, d, color, frame, maxFrames);
             o = renderOutline(parsed, d, color, frame, maxFrames);
-            g = Graphics.FromImage(o);
-            g.DrawImage(b, 4, 4);
-            return o;
+            g = Graphics.FromImage(b[1]);
+
+            g.DrawImage(o, 0,0);
+            ImageAttributes attr = new ImageAttributes();
+            g.DrawImage(b[0], 0, 0);//, new Rectangle(0, 0, 88, 108), 0, 0, 88, 108, GraphicsUnit.Pixel, attr
+            //attr.SetColorKey(Color.FromArgb(255, 16, 16, 16), Color.White);
+            //g = Graphics.FromImage(n);
+            //g.DrawImage(b[1], new Rectangle(0, 0, 88, 108), 0, 0, 88, 108, GraphicsUnit.Pixel, attr);
+            
+            return b[1];
         }
         private static void processUnitOutlined(string u)
         {
@@ -1786,13 +1829,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 }
 
             }
-            /*
+            
             System.IO.Directory.CreateDirectory("gifs");
             ProcessStartInfo startInfo = new ProcessStartInfo(@"convert.exe");
             startInfo.UseShellExecute = false;
-            startInfo.Arguments = "-dispose background -delay 25 -loop 0 images/"+u+"_color* gifs/" + u + "_animated.gif";
+            string s = "";
+            for(int i = 0; i < 8; i++)
+                s+= "color" + i + "/" + u + "_face* ";
+            startInfo.Arguments = "-dispose background -delay 25 -loop 0 "+ s +" gifs/" + u + "_animated.gif";
             Process.Start(startInfo).WaitForExit();
-            */
+            
             bin.Close();
 
             if (File.Exists(u + "_Firing_X.vox"))
@@ -3616,12 +3662,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
             System.IO.Directory.CreateDirectory("Palettes");
             System.IO.Directory.CreateDirectory("indexed");
-            
+            /*
             for (int c = 0; c < 8; c++)
             {
                 renderOnlyColors(c).Save("PaletteColor" + c + ".png", ImageFormat.Png);
                 renderOnlyTerrainColors(c).Save("PaletteTerrainColor" + c + ".png", ImageFormat.Png);
             }
+
+            Madden();
+            renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
+            */
             InitializePalettes();
 
             /*for (int c = 0; c < 8; c++)
@@ -3635,17 +3685,15 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }*/
 
             
-            Madden();
-            renderOnlyColors(7).Save("PaletteCrazy.png", ImageFormat.Png);
 
            // CreateIndexedBitmap(new Bitmap("crazy/Infantry_face0_0.png"), "redefined_Infantry_color1.png", 1);
-
+            /*
             processTerrainChannel();
 
             //processUnitOutlined("Block");
             
             //Madden();
-
+            
             processUnitChannel("Infantry");
             processUnitChannel("Infantry_P");
             processUnitChannel("Infantry_S");
@@ -3683,15 +3731,10 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitChannel("Castle");
             processUnitChannel("Estate");
             
-
+            */
 
             
             /*
-            processUnitOutlined("Copter");
-            processUnitOutlined("Copter_P");
-            processUnitOutlined("Copter_S");
-            processUnitOutlined("Copter_T");
-
             processUnitOutlined("Infantry");
             processUnitOutlined("Infantry_P");
             processUnitOutlined("Infantry_S");
@@ -3706,7 +3749,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Tank_P");
             processUnitOutlined("Tank_S");
             processUnitOutlined("Tank_T");
-            
+             * 
             processUnitOutlined("Supply");
             processUnitOutlined("Supply_P");
             processUnitOutlined("Supply_S");
@@ -3715,8 +3758,14 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Plane");
             processUnitOutlined("Plane_P");
             processUnitOutlined("Plane_S");
+            */
             processUnitOutlined("Plane_T");
-            
+            /*
+            processUnitOutlined("Copter");
+            processUnitOutlined("Copter_P");
+            processUnitOutlined("Copter_S");
+            processUnitOutlined("Copter_T");
+
             
             processUnitOutlined("City");
             processUnitOutlined("Factory");
@@ -3725,7 +3774,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             processUnitOutlined("Castle");
             processUnitOutlined("Estate");
             
-             */
+            */
 
             //       makeGamePreview(9, 18);
 
