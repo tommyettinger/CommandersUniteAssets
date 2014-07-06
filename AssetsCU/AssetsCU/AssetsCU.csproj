@@ -326,6 +326,9 @@
     <None Include="Tank_P_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Tank_S_Firing_X.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Tank_S_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
