@@ -2035,7 +2035,6 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     currentlyFiring %= 8;
                     secondSet ^= 1;
-                    Console.WriteLine(secondSet);
                 }
                 //if (f > 0)
                 //{
@@ -4156,9 +4155,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 int current_color = 249 - vx.color;
 
-                if (colors[current_color + faction][3] == spin_alpha_0)
+                if ((frame % 2 != 0) && colors[current_color + faction][3] == spin_alpha_0)
                     continue;
-                else if (colors[current_color + faction][3] == spin_alpha_1)
+                else if ((frame % 2 != 1) && colors[current_color + faction][3] == spin_alpha_1)
                     continue;
                 else if (current_color == 120 || current_color == 152 || current_color == 160 || current_color == 136 || current_color >= 168)
                     continue;
@@ -7213,7 +7212,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             proc = new Process();
             proc.StartInfo = new ProcessStartInfo(@"ffmpeg.exe");
             proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.Arguments = "-r 8 -i animation\\%03d.png -b:v 2000k -vcodec libx264 -pix_fmt yuv420p -vprofile high -g 30 -r 6 animation\\preview.mp4";
+            proc.StartInfo.Arguments = @"-r 8 -i animation\%03d.png -b:v 2000k -vcodec libx264 -pix_fmt yuv420p -vprofile high -g 30 -r 6 animation\preview.mp4";
             proc.Start();
             proc.WaitForExit();
 
