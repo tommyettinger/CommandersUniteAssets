@@ -637,7 +637,7 @@ Ruins	purple-gray
                     if ((y >= 28 || y <= 3) && (x < 16 + depth) && (x > 16 - depth) && (Math.Abs(16 - x) + depth) % 2 == 1)
                     {
 
-                        float[] power = new float[] { 0.5F, 0.8F }; //, 0.5F, 0.8F, 0.5F, 0.8F,
+//                        float[] power = new float[] { 0.5F, 0.8F }; //, 0.5F, 0.8F, 0.5F, 0.8F,
                         //                        float[] power = new float[] { 0.3F, 0.6F, 0.32F, 0.65F, 0.34F, 0.7F, 0.36F, 0.75F, 0.38F, 0.8F };
                         int dist = (Math.Abs(16 - x) + depth) % 2;
                         //int dist = ((x - 8)/2) % 10;
@@ -649,7 +649,7 @@ Ruins	purple-gray
                     }
                     else if ((x >= 28 || x <= 3) && (y < 16 + depth) && (y > 16 - depth) && (Math.Abs(16 - y) + depth) % 2 == 1)
                     {
-                        float[] power = new float[] { 0.5F, 0.8F }; //, 0.4F, 0.7F, 0.4F, 0.8F 
+//                        float[] power = new float[] { 0.5F, 0.8F }; //, 0.4F, 0.7F, 0.4F, 0.8F 
                         int dist = (Math.Abs(16 - y) + depth) % 2;
                         imageAttributes.SetColorMatrix(
                            colorMatrixBright,

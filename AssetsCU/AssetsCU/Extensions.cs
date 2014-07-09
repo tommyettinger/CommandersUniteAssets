@@ -50,14 +50,25 @@ namespace AssetsCU
             if (mat.Length == 0)
                 return mat;
 
-            for (int i = 0; i < mat.GetLength(0); i++ )
+            for (int i = 0; i < mat.GetLength(0); i++)
             {
-                for (int j = 0; j < mat.GetLength(1); j++ )
+                for (int j = 0; j < mat.GetLength(1); j++)
                 {
                     mat[i, j] = item;
                 }
             }
             return mat;
+        }
+        public static T[] Fill<T>(this T[] arr, T item)
+        {
+            if (arr.Length == 0)
+                return arr;
+
+            for (int i = 0; i < arr.GetLength(0); i++)
+            {
+                    arr[i] = item;
+            }
+            return arr;
         }
         public static PlusVoxels.UnitInfo RandomFactionUnit(this PlusVoxels.UnitInfo[,] mat, int color)
         {
