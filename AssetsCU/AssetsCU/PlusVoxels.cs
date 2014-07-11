@@ -5802,7 +5802,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         for (int frame = 0; frame < 16; frame++)
                         {
                             CreateChannelBitmap(processSingleLargeFrame(firing[frame], 7, d, frame), folder + "/" + u + "_Attack_" + w + "_face" + d + "_" + (frame) + ".png");
-                            CreateChannelBitmap(processSingleLargeFrame(receive[frame], 7, d, frame), folder + "/" + u + "_Recieve_" + w + "_face" + d + "_" + (frame) + ".png");
+                            CreateChannelBitmap(processSingleLargeFrame(receive[frame], 7, d, frame), folder + "/" + u + "_Receive_" + w + "_face" + d + "_" + (frame) + ".png");
                         }
                     }
 
@@ -6004,6 +6004,25 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     CreateChannelBitmap(bold, "indexed/" + Terrains[i] + "_bold_color" + c + ".png", 9);
                 }*/
             }
+        }
+
+        public static void processMedalChannel(string u)
+        {
+            Console.WriteLine("Processing: " + u);
+            log.AppendLine(u);
+            BinaryReader bin = new BinaryReader(File.Open(u + "_X.vox", FileMode.Open));
+            MagicaVoxelData[] parsed = FromMagica(bin);
+            int framelimit = 4;
+
+            System.IO.Directory.CreateDirectory("indexed"); //("color" + i);
+            for (int f = 0; f < framelimit; f++)
+            { //"color" + i + "/"
+                CreateChannelBitmap(processSingleOutlined(parsed, 0, "SE", f, framelimit), "indexed/" + u + "_face0" + "_" + f + ".png");
+                CreateChannelBitmap(processSingleOutlined(parsed, 0, "SW", f, framelimit), "indexed/" + u + "_face1" + "_" + f + ".png");
+                CreateChannelBitmap(processSingleOutlined(parsed, 0, "NW", f, framelimit), "indexed/" + u + "_face2" + "_" + f + ".png");
+                CreateChannelBitmap(processSingleOutlined(parsed, 0, "NE", f, framelimit), "indexed/" + u + "_face3" + "_" + f + ".png");
+            }
+            bin.Close();
         }
         public static void processUnitChannel(string u)
         {
@@ -7926,6 +7945,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             //processUnitOutlined("Block");
 
             Madden();
+            processMedalChannel("Medal_P");
+            processMedalChannel("Medal_S");
+            processMedalChannel("Medal_T");
             
             processUnitChannel("Plane");
             processUnitChannel("Plane_P");

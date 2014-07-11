@@ -260,6 +260,15 @@
     <None Include="LightTank_rounded.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Medal_P_X.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Medal_S_X.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Medal_T_X.vox">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Plane_P_X.vox">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
