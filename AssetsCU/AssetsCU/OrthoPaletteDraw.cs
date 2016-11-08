@@ -12,6 +12,59 @@ namespace AssetsCU
 
     class OrthoPaletteDraw
     {
+        public static Random r = new Random();
+        public static float[][] flatcolors = new float[][]
+        {
+            //plains
+            new float[] {0.63F,0.92F,0.3F,3F},
+            //forest
+            new float[] {0.2F,0.7F,0.15F,3F},
+            //desert
+            new float[] {1F,0.9F,0.0F,3F},
+            //jungle
+            new float[] {0F,0.5F,0.35F,3F},
+            //hills
+            new float[] {0.9F,0.6F,0.15F,7F},
+            //mountains
+            new float[] {0.7F,0.75F,0.82F,7F},
+            //ruins
+            new float[] {0.8F,0.4F,0.7F,5F},
+            //tundra
+            new float[] {0.8F,1F,1F,3F},
+            //road
+            new float[] {0.5F,0.5F,0.5F,5F},
+            //river
+            new float[] {0F,0.2F,0.85F,1F},
+            //building base
+            new float[] {0.55F,0.55F,0.55F,5F},
+        };
+        private static string[] terrainnames = new string[]
+        {
+            "Plains"
+            ,"Forest"
+            ,"Desert"
+            ,"Jungle"
+            ,"Hills"
+            ,"Mountains"
+            ,"Ruins"
+            ,"Tundra"
+            ,"Road"
+            ,"River"
+            ,"Basement"
+            
+        };
+        /*
+Plains	yellow-green
+Road	50% gray
+River	deep blue
+Mountains	light brown
+Forest	mid green
+Jungle	dark teal
+Tundra	whitish-blue
+Desert	yellow-orange
+Hills	red-brown
+Ruins	purple-gray
+        */
         private static float[][] colors = null;
         public struct MagicaVoxelDataPaletted
         {
@@ -165,258 +218,207 @@ namespace AssetsCU
             b.Save("output.png", ImageFormat.Png);
         }
 
-
-        public static Bitmap drawPixelsS(MagicaVoxelDataPaletted[] voxels)
+        public static Bitmap drawPixelsFlat(int color)
         {
-            Bitmap b = new Bitmap(44,44);
-            Graphics g = Graphics.FromImage((Image)b);
+            Bitmap b = new Bitmap(64, 48, PixelFormat.Format32bppArgb);
+            Bitmap bold = new Bitmap(64, 48, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(b);
+            Graphics gBold = Graphics.FromImage(bold);
             //Image image = new Bitmap("cube_large.png");
-            Image image = new Bitmap("cube_gray_ortho.png");
+            Image image = new Bitmap("cube_ortho.png");
+            //            Image gray = new Bitmap("cube_gray_soft.png");
             //Image reversed = new Bitmap("cube_reversed.png");
             ImageAttributes imageAttributes = new ImageAttributes();
             int width = 2;
             int height = 3;
 
+            int[,] shades = new int[32, 32];
+            int depth = (int)(flatcolors[color][3]);
+
+            for (int y = 31; y >= 0; y--)
+            {
+                for (int x = 0; x <= 31; x++)
+                {
+                    if ((y >= 30 || y <= 1) && (x < 16 + depth) && (x > 16 - depth) && (Math.Abs(16 - x) + depth) % 2 == 1)
+                    {
+                        shades[x, y] = 2;
+                    }
+
+                    else if ((x >= 30 || x <= 1) && (y < 16 + depth) && (y > 16 - depth) && (Math.Abs(16 - y) + depth) % 2 == 1)// && (y % 2 == 1)
+                    {
+                        shades[x, y] = 2;
+                    }
+                    else
+                    {
+                        shades[x, y] = (x == 0 || y == 0 || x == 31 || y == 31) ? 0 : (r.Next(50) == 0) ? r.Next(2) : 1;
+                    }
+                }
+            }
+
+
+
             //g.DrawImage(image, 10, 10, width, height);
+            float merged = (flatcolors[color][0] + flatcolors[color][1] + flatcolors[color][2]) * 0.45F;
 
-            float[][] colorMatrixElements = { 
-   new float[] {1F,  0,  0,  0, 0},
-   new float[] {0,  1F,  0,  0, 0},
-   new float[] {0,  0,  1F,  0, 0},
+
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][]{ 
+   new float[] {(merged + flatcolors[color][0]) * 0.5F,  0,  0,  0, 0},
+   new float[] {0,  (merged + flatcolors[color][1]) * 0.5F,  0,  0, 0},
+   new float[] {0,  0,  (merged + flatcolors[color][2]) * 0.5F,  0, 0},
    new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}};
+   new float[] {0, 0, 0, 0, 1F}});
+            ColorMatrix colorMatrixDark = new ColorMatrix(new float[][]{ 
+   new float[] {merged*0.3F + flatcolors[color][0] * 0.5F,  0,  0,  0, 0},
+   new float[] {0,  merged*0.3F + flatcolors[color][1] * 0.52F,  0,  0, 0},
+   new float[] {0,  0,  merged*0.3F + flatcolors[color][2] * 0.58F,  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
+            ColorMatrix colorMatrixBright = new ColorMatrix(new float[][]{ 
+   new float[] {merged*0.55F + flatcolors[color][0] * 0.85F,  0,  0,  0, 0},
+   new float[] {0,  merged*0.55F + flatcolors[color][1] * 0.85F,  0,  0, 0},
+   new float[] {0,  0,  merged*0.55F + flatcolors[color][2] * 0.85F,  0, 0},
+   new float[] {0,  0,  0,  1F, 0},
+   new float[] {0, 0, 0, 0, 1F}});
 
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-
+            ColorMatrix[] mats = new ColorMatrix[] { colorMatrixDark, colorMatrix, colorMatrixBright };
             imageAttributes.SetColorMatrix(
                colorMatrix,
                ColorMatrixFlag.Default,
                ColorAdjustType.Bitmap);
-            foreach (MagicaVoxelDataPaletted vx in voxels.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
+
+
+
+
+            imageAttributes.SetColorMatrix(colorMatrixDark, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+            for (int z = 0; z < depth; z++)
             {
-                int current_color = vx.color - 1;
-                
-                colorMatrix = new ColorMatrix(new float[][]{ 
-   new float[] {colors[current_color ][0],  0,  0,  0, 0},
-   new float[] {0,  colors[current_color][1],  0,  0, 0},
-   new float[] {0,  0,  colors[current_color][2],  0, 0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}});
-
-                imageAttributes.SetColorMatrix(
-                   colorMatrix,
-                   ColorMatrixFlag.Default,
-                   ColorAdjustType.Bitmap);
-
-                g.DrawImage(
-                   image, //(vx.y, 40 - 20 - 2 + vx.x - vx.z, width, height)
-                   new Rectangle(vx.y * 2, 44 - 22 - 2 + vx.x - vx.z*2, width, height),  // destination rectangle 
-                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
-                   0, 0,        // upper-left corner of source rectangle 
-                   width,       // width of source rectangle
-                   height,      // height of source rectangle
-                   GraphicsUnit.Pixel,
-                   imageAttributes);
-            }
-            return b;
-        }
-
-        public static Bitmap drawPixelsW(MagicaVoxelDataPaletted[] voxels)
-        {
-            Bitmap b = new Bitmap(44,44);
-            Graphics g = Graphics.FromImage((Image)b);
-            //Image image = new Bitmap("cube_large.png");
-            Image image = new Bitmap("cube_gray_ortho.png");
-            //Image reversed = new Bitmap("cube_reversed.png");
-            ImageAttributes imageAttributes = new ImageAttributes();
-            int width = 2;
-            int height = 3;
-
-            //g.DrawImage(image, 10, 10, width, height);
-
-            float[][] colorMatrixElements = { 
-   new float[] {1F, 0,  0,  0,  0},
-   new float[] {0, 1F,  0,  0,  0},
-   new float[] {0,  0,  1F, 0,  0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0,  0,  0,  0, 1F}};
-
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-
-            imageAttributes.SetColorMatrix(
-               colorMatrix,
-               ColorMatrixFlag.Default,
-               ColorAdjustType.Bitmap);
-            MagicaVoxelDataPaletted[] vls = new MagicaVoxelDataPaletted[voxels.Length];
-            for (int i = 0; i < voxels.Length; i++)
-            {
-                byte tempX = (byte)(voxels[i].x - 11);
-                byte tempY = (byte)(voxels[i].y - 11);
-                vls[i].x = (byte)((tempY) + 11);
-                vls[i].y = (byte)((tempX * -1) + 11 - 1);
-                vls[i].z = voxels[i].z;
-                vls[i].color = voxels[i].color;
-
-            }
-            foreach (MagicaVoxelDataPaletted vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
-            {
-
-                int current_color = vx.color - 1;
-
-                colorMatrix = new ColorMatrix(new float[][]{ 
-   new float[] {colors[current_color ][0],  0,  0,  0, 0},
-   new float[] {0,  colors[current_color][1],  0,  0, 0},
-   new float[] {0,  0,  colors[current_color][2],  0, 0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}});
-
-                imageAttributes.SetColorMatrix(
-                   colorMatrix,
-                   ColorMatrixFlag.Default,
-                   ColorAdjustType.Bitmap);
-
-                g.DrawImage(
-                   image,//(vx.y * 2, 60 - 20 - 3 + vx.x - vx.z*2, width, height)
-                   new Rectangle(vx.y * 2, 44 - 22 - 2 + vx.x - vx.z*2, width, height),  // destination rectangle 
-                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
-                   0, 0,        // upper-left corner of source rectangle 
-                   width,       // width of source rectangle
-                   height,      // height of source rectangle
-                   GraphicsUnit.Pixel,
-                   imageAttributes);
-            }
-            return b;
-        }
-
-        public static Bitmap drawPixelsE(MagicaVoxelDataPaletted[] voxels)
-        {
-            Bitmap b = new Bitmap(44,44);
-            Graphics g = Graphics.FromImage((Image)b);
-            //Image image = new Bitmap("cube_large.png");
-            Image image = new Bitmap("cube_gray_ortho.png");
-            //Image reversed = new Bitmap("cube_reversed.png");
-            ImageAttributes imageAttributes = new ImageAttributes();
-            int width = 2;
-            int height = 3;
-
-            //g.DrawImage(image, 10, 10, width, height);
-
-            float[][] colorMatrixElements = { 
-   new float[] {1F, 0,  0,  0,  0},
-   new float[] {0, 1F,  0,  0,  0},
-   new float[] {0,  0,  1F, 0,  0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0,  0,  0,  0, 1F}};
-
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-
-            imageAttributes.SetColorMatrix(
-               colorMatrix,
-               ColorMatrixFlag.Default,
-               ColorAdjustType.Bitmap);
-            MagicaVoxelDataPaletted[] vls = new MagicaVoxelDataPaletted[voxels.Length];
-            for (int i = 0; i < voxels.Length; i++)
-            {
-                byte tempX = (byte)(voxels[i].x - 11);
-                byte tempY = (byte)(voxels[i].y - 11);
-                vls[i].x = (byte)((tempY * -1) + 11 - 1);
-                vls[i].y = (byte)(tempX + 11);
-                vls[i].z = voxels[i].z;
-                vls[i].color = voxels[i].color;
-
-            }
-            foreach (MagicaVoxelDataPaletted vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
-            {
-                int current_color = vx.color - 1;
-
-                colorMatrix = new ColorMatrix(new float[][]{ 
-   new float[] {colors[current_color ][0],  0,  0,  0, 0},
-   new float[] {0,  colors[current_color][1],  0,  0, 0},
-   new float[] {0,  0,  colors[current_color][2],  0, 0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}});
-
-                imageAttributes.SetColorMatrix(
-                   colorMatrix,
-                   ColorMatrixFlag.Default,
-                   ColorAdjustType.Bitmap);
-
-                g.DrawImage(
+                //vx.y * 2, 44 - 22 - 2 + vx.x - vx.z*2
+                for (int y = 31; y >= 0; y--)
+                {
+                    g.DrawImage(
                    image,
-                   new Rectangle(vx.y * 2, 44 - 22 - 2 + vx.x - vx.z*2, width, height),  // destination rectangle 
-                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   new Rectangle(y * 2, 48 - 3 - z * 2, width, height),  // destination rectangle 
+                        //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                    0, 0,        // upper-left corner of source rectangle 
                    width,       // width of source rectangle
                    height,      // height of source rectangle
                    GraphicsUnit.Pixel,
                    imageAttributes);
+                }
             }
-            return b;
-        }
 
-        public static Bitmap drawPixelsN(MagicaVoxelDataPaletted[] voxels)
-        {
-            Bitmap b = new Bitmap(44,44);
-            Graphics g = Graphics.FromImage((Image)b);
-            //Image image = new Bitmap("cube_large.png");
-            Image image = new Bitmap("cube_gray_ortho.png");
-            //Image reversed = new Bitmap("cube_reversed.png");
-            ImageAttributes imageAttributes = new ImageAttributes();
-            int width = 2;
-            int height = 3;
-
-            //g.DrawImage(image, 10, 10, width, height);
-
-            float[][] colorMatrixElements = { 
-   new float[] {1F, 0,  0,  0,  0},
-   new float[] {0, 1F,  0,  0,  0},
-   new float[] {0,  0,  1F, 0,  0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0,  0,  0,  0, 1F}};
-
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-
-            imageAttributes.SetColorMatrix(
-               colorMatrix,
-               ColorMatrixFlag.Default,
-               ColorAdjustType.Bitmap);
-            MagicaVoxelDataPaletted[] vls = new MagicaVoxelDataPaletted[voxels.Length];
-            for (int i = 0; i < voxels.Length; i++)
+            //            imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+            for (int z = 0; z < depth; z++)
             {
-                byte tempX = (byte)(voxels[i].x - 11);
-                byte tempY = (byte)(voxels[i].y - 11);
-                vls[i].x = (byte)((tempX * -1) + 11 - 1);
-                vls[i].y = (byte)((tempY * -1) + 11 - 1);
-                vls[i].z = voxels[i].z;
-                vls[i].color = voxels[i].color;
-
-            }
-            foreach (MagicaVoxelDataPaletted vx in vls.OrderBy(v => v.x * 32 - v.y + v.z * 32 * 128)) //voxelData[i].x + voxelData[i].z * 32 + voxelData[i].y * 32 * 128
-            {
-                int current_color = vx.color - 1;
-
-                colorMatrix = new ColorMatrix(new float[][]{ 
-   new float[] {colors[current_color ][0],  0,  0,  0, 0},
-   new float[] {0,  colors[current_color][1],  0,  0, 0},
-   new float[] {0,  0,  colors[current_color][2],  0, 0},
-   new float[] {0,  0,  0,  1F, 0},
-   new float[] {0, 0, 0, 0, 1F}});
-
-                imageAttributes.SetColorMatrix(
-                   colorMatrix,
-                   ColorMatrixFlag.Default,
-                   ColorAdjustType.Bitmap);
-
-                g.DrawImage(
+                for (int y = 31; y >= 0; y--)
+                {
+                    gBold.DrawImage(
                    image,
-                   new Rectangle(vx.y * 2, 44 - 22 - 2 + vx.x - vx.z*2, width, height),  // destination rectangle 
-                    //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   new Rectangle(y * 2, 48 - 3 - z * 2, width, height),  // destination rectangle 
+                        //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
                    0, 0,        // upper-left corner of source rectangle 
                    width,       // width of source rectangle
                    height,      // height of source rectangle
                    GraphicsUnit.Pixel,
                    imageAttributes);
+                }
             }
+
+            
+            for (int y = 31; y >= 0; y--)
+            {
+                for (int x = 0; x <= 31; x++)
+                {
+                    imageAttributes.SetColorMatrix(mats[shades[x, y]], ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    //if ((y >= 30 || y <= 1) && (x < 16 + depth) && (x > 16 - depth) && (Math.Abs(16 - x) + depth) % 2 == 1)
+                    //{
+
+                    //    float[] power = new float[] { 0.4F, 0.6F }; //, 0.4F, 0.7F, 0.4F, 0.8F
+                    //    //                        float[] power = new float[] { 0.3F, 0.6F, 0.32F, 0.65F, 0.34F, 0.7F, 0.36F, 0.75F, 0.38F, 0.8F };
+                    //    int dist = (Math.Abs(16 - x) + depth) % 2;
+                    //    //int dist = ((x - 8)/2) % 10;
+
+                    //    imageAttributes.SetColorMatrix(
+                    //       colorMatrixBright,
+                    //       ColorMatrixFlag.Default,
+                    //       ColorAdjustType.Bitmap);
+                    //}
+                    //else if ((x >= 30 || x <= 1) && (y < 16 + depth) && (y > 16 - depth) && (Math.Abs(16 - y) + depth) % 2 == 1)// && (y % 2 == 1)
+                    //{
+                    //    float[] power = new float[] { 0.4F, 0.6F }; //, 0.5F, 0.8F, 0.5F, 0.8F,
+                    //    //                        float[] power = new float[] { 0.4F, 0.6F, 0.4F, 0.7F, 0.4F, 0.8F };
+                    //    int dist = (Math.Abs(16 - y) + depth) % 2;
+                    //    imageAttributes.SetColorMatrix(
+                    //       colorMatrixBright,
+                    //       ColorMatrixFlag.Default,
+                    //       ColorAdjustType.Bitmap);
+                    //}
+                    //else
+                    //{
+                    //    imageAttributes.SetColorMatrix(
+                    //        (x == 0 || y == 0 || x == 31 || y == 31) ? colorMatrixDark : colorMatrix,
+                    //        //(x == z || y == z || x == 31 - z || y == 31 - z) ? colorMatrixDark : colorMatrix,
+                    //       ColorMatrixFlag.Default,
+                    //       ColorAdjustType.Bitmap);
+                    //}
+                    g.DrawImage(
+                   image,
+                   new Rectangle(y * 2, 48 - 32 + x - depth * 2, width, height),  // destination rectangle 
+                        //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                   0, 0,        // upper-left corner of source rectangle 
+                   width,       // width of source rectangle
+                   height,      // height of source rectangle
+                   GraphicsUnit.Pixel,
+                   imageAttributes);
+
+                    ///////////////
+                    ///////////////BRIGHT VERSION CODE
+                    ///////////////
+                    if ((y >= 28 || y <= 3) && (x < 16 + depth) && (x > 16 - depth) && (Math.Abs(16 - x) + depth) % 2 == 1)
+                    {
+
+                        //                        float[] power = new float[] { 0.5F, 0.8F }; //, 0.5F, 0.8F, 0.5F, 0.8F,
+                        //                        float[] power = new float[] { 0.3F, 0.6F, 0.32F, 0.65F, 0.34F, 0.7F, 0.36F, 0.75F, 0.38F, 0.8F };
+                        int dist = (Math.Abs(16 - x) + depth) % 2;
+                        //int dist = ((x - 8)/2) % 10;
+
+                        imageAttributes.SetColorMatrix(
+                           colorMatrixBright,
+                           ColorMatrixFlag.Default,
+                           ColorAdjustType.Bitmap);
+                    }
+                    else if ((x >= 28 || x <= 3) && (y < 16 + depth) && (y > 16 - depth) && (Math.Abs(16 - y) + depth) % 2 == 1)
+                    {
+                        //                        float[] power = new float[] { 0.5F, 0.8F }; //, 0.4F, 0.7F, 0.4F, 0.8F 
+                        int dist = (Math.Abs(16 - y) + depth) % 2;
+                        imageAttributes.SetColorMatrix(
+                           colorMatrixBright,
+                           ColorMatrixFlag.Default,
+                           ColorAdjustType.Bitmap);
+                    }
+                    else
+                    {
+                        imageAttributes.SetColorMatrix(
+                            (x <= 3 || y <= 3 || x >= 28 || y >= 28) ? colorMatrixDark : mats[shades[x, y]],
+                            //(x == z || y == z || x == 31 - z || y == 31 - z) ? colorMatrixDark : colorMatrix,
+                           ColorMatrixFlag.Default,
+                           ColorAdjustType.Bitmap);
+                    }
+                    gBold.DrawImage(
+                    image,
+                    new Rectangle(y * 2, 48 - 32 + x - depth * 2, width, height),  // destination rectangle 
+                        //                   new Rectangle((vx.x + vx.y) * 4, 128 - 6 - 32 - vx.y * 2 + vx.x * 2 - 4 * vx.z, width, height),  // destination rectangle 
+                    0, 0,        // upper-left corner of source rectangle 
+                    width,       // width of source rectangle
+                    height,      // height of source rectangle
+                    GraphicsUnit.Pixel,
+                    imageAttributes);
+                }
+            }
+            System.IO.Directory.CreateDirectory("TerrainOrtho");
+            b.Save("TerrainOrtho/" + terrainnames[color] + ".png");
+            bold.Save("TerrainOrtho/" + terrainnames[color] + "_bold.png");
+
             return b;
         }
 

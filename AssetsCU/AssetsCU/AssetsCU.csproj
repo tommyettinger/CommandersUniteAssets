@@ -47,10 +47,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="LocalMap.cs" />
     <Compile Include="OrthoDawnBringer.cs" />
+    <Compile Include="OrthoPaletteDrawOld.cs" />
     <Compile Include="OrthoPaletteDraw.cs" />
     <Compile Include="DawnDraw.cs" />
     <Compile Include="OffPaletteDraw.cs" />
+    <Compile Include="OrthoVoxelsOld.cs" />
     <Compile Include="PlusPaletteDraw.cs" />
     <Compile Include="DawnVoxels.cs" />
     <Compile Include="OffVoxels.cs" />
@@ -484,6 +487,9 @@
     <Content Include="ffmpeg.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="flat_ortho.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="flat_soft.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -542,6 +548,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PaletteTerrainColor7.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="spin_ortho.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="spin_soft.png">
